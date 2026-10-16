@@ -104,6 +104,47 @@ button{cursor:pointer}
 .wagon{position:absolute;width:16px;height:30px;margin:-15px 0 0 -8px;border-radius:4px;background:#9C4A2B;box-shadow:inset 0 0 0 2px rgba(0,0,0,.18),0 2px 3px rgba(18,23,28,.25);z-index:3}
 .wagon::after{content:"";position:absolute;left:4px;right:4px;top:5px;bottom:5px;border-radius:2px;background:repeating-linear-gradient(180deg,rgba(0,0,0,.18) 0 2px,transparent 2px 5px)}
 
+/* plane mode: the train becomes a plane on flight days */
+.train .jet{position:absolute;left:50%;top:50%;width:52px;height:54px;margin:-27px 0 0 -26px;opacity:0;transform:scale(.3) rotate(-20deg);transition:transform 620ms var(--spring),opacity 260ms ease}
+.train .jet .shadow{position:absolute;left:10px;top:14px;opacity:.22;filter:blur(2px)}
+.train .body{transition:transform 520ms var(--spring),opacity 260ms ease}
+.train.plane .jet{opacity:1;transform:scale(1) rotate(0)}
+.train.plane .body{opacity:0;transform:scale(.4)}
+.train.plane.up .jet{transform:rotate(180deg)}
+.train.plane .beam{opacity:0 !important}
+.train.plane .jet .shadow{animation:alt 3s ease-in-out infinite alternate}
+@keyframes alt{from{transform:translate(0,0)}to{transform:translate(3px,3px)}}
+.trail{position:absolute;width:3px;height:18px;margin:-9px 0 0 -1.5px;border-radius:3px;background:linear-gradient(rgba(255,255,255,0),rgba(255,255,255,.95));box-shadow:0 0 0 1px rgba(150,170,190,.35);animation:trail 1100ms ease-out forwards;z-index:6}
+@keyframes trail{from{opacity:.95;transform:rotate(var(--a)) scaleY(.6)}to{opacity:0;transform:rotate(var(--a)) translateY(var(--dy)) scaleY(2.4)}}
+.flightpath{fill:none;stroke:#2563C9;stroke-width:2.5;stroke-dasharray:2 7;stroke-linecap:round;opacity:.7;animation:dash 1.6s linear infinite}
+@keyframes dash{to{stroke-dashoffset:-18}}
+.fp-label{font:800 11px var(--font);fill:#2563C9;letter-spacing:.04em}
+
+/* live progress card */
+.live{margin:16px 18px 0;border-radius:22px;background:var(--surface);box-shadow:0 1px 2px rgba(18,23,28,.05),0 10px 26px rgba(18,23,28,.06);padding:16px 16px 14px;overflow:hidden;position:relative}
+.live .row1{display:flex;align-items:center;gap:12px}
+.live .ico{flex:0 0 40px;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--ground);color:var(--ink)}
+.live.on .ico{background:#E6F0FF;color:var(--air)}
+.live .ico .ping{position:absolute;width:40px;height:40px;border-radius:50%;background:var(--air);opacity:0}
+.live.on .ico{position:relative}
+.live.on .ico .ping{animation:ping 2s ease-out infinite}
+@keyframes ping{0%{transform:scale(.6);opacity:.35}100%{transform:scale(1.6);opacity:0}}
+.live h2{margin:0;font-size:18px;line-height:1.2;font-weight:900;letter-spacing:-.015em}
+.live .meta{display:block;margin-top:2px;font-size:13.5px;line-height:1.35;color:var(--ink-2);font-weight:600}
+.live .act{margin-left:auto;flex:0 0 auto;min-height:40px;border:0;border-radius:999px;padding:3px 14px 0;font-weight:800;font-size:14px;background:var(--ink);color:#fff}
+.live .act.ghost{background:var(--ground);color:var(--ink-2)}
+.live .next{margin-top:12px;padding-top:12px;border-top:1px solid var(--rule);font-size:15px;line-height:1.4;color:var(--ink-2)}
+.live .next b{color:var(--ink)}
+.steps-live{list-style:none;margin:14px 0 2px;padding:0;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));position:relative}
+.steps-live::before{content:"";position:absolute;left:8%;right:8%;top:9px;height:3px;background:var(--rail);border-radius:3px}
+.steps-live .fill{position:absolute;left:8%;top:9px;height:3px;background:var(--air);border-radius:3px;transition:width 700ms var(--spring)}
+.steps-live li{position:relative;display:flex;flex-direction:column;align-items:center;gap:5px;font-size:11px;font-weight:800;color:var(--ink-3);text-align:center}
+.steps-live li i{width:20px;height:20px;border-radius:50%;background:var(--surface);border:3px solid var(--rail);display:flex;align-items:center;justify-content:center;transition:transform 420ms var(--spring),background 200ms ease,border-color 200ms ease}
+.steps-live li.done i{background:var(--air);border-color:var(--air)}
+.steps-live li.now i{border-color:var(--air);background:#fff;transform:scale(1.25);box-shadow:0 0 0 4px rgba(37,99,201,.18)}
+.steps-live li.now{color:var(--air)}
+.stn.you .mark::after{content:"YOU";position:absolute;top:-8px;left:50%;transform:translateX(-50%);padding:2px 5px 0;border-radius:4px;background:var(--air);color:#fff;font-size:9px;font-weight:900;letter-spacing:.06em;box-shadow:0 0 0 2px var(--ground)}
+
 /* the train (top-down, nose pointing down the line) */
 .train{position:absolute;left:0;top:0;width:28px;height:82px;transform-origin:14px 41px;z-index:4;pointer-events:none;will-change:transform}
 .train .body{width:28px;height:82px;transition:transform 520ms var(--spring);transform-origin:50% 50%}
@@ -340,8 +381,9 @@ button{cursor:pointer}
         <h1 id="headline">Ontario trip</h1>
         <p>10 days, 3 universities, 4 flights. Tap a station for the plan.</p>
       </div>
+      <section class="live" id="live" aria-live="polite"></section>
       <nav class="lines" aria-label="Jump to a school" id="lines"></nav>
-      <ol class="route" id="route"><div class="features" id="features" aria-hidden="true"></div><svg class="tracksvg" id="trackSvg" aria-hidden="true"></svg><div class="features over" id="featuresTop" aria-hidden="true"></div><div class="train" id="train" aria-hidden="true"><div class="body"><svg width="28" height="82" viewBox="0 0 28 82"><g fill="#2B343C"><rect x="1" y="5" width="3" height="6" rx="1"/><rect x="24" y="5" width="3" height="6" rx="1"/><rect x="1" y="21" width="3" height="6" rx="1"/><rect x="24" y="21" width="3" height="6" rx="1"/><rect x="0" y="42" width="3" height="7" rx="1"/><rect x="25" y="42" width="3" height="7" rx="1"/><rect x="0" y="64" width="3" height="7" rx="1"/><rect x="25" y="64" width="3" height="7" rx="1"/></g><rect x="4" y="1" width="20" height="31" rx="6" fill="#12171C"/><rect x="11.5" y="5" width="5" height="23" rx="2.5" fill="#34404A"/><g fill="#8FC7F0"><rect x="5.5" y="6" width="2" height="4" rx="1"/><rect x="5.5" y="13" width="2" height="4" rx="1"/><rect x="5.5" y="20" width="2" height="4" rx="1"/><rect x="20.5" y="6" width="2" height="4" rx="1"/><rect x="20.5" y="13" width="2" height="4" rx="1"/><rect x="20.5" y="20" width="2" height="4" rx="1"/></g><rect x="4" y="26" width="20" height="2.5" fill="#F2B233"/><rect x="12" y="32" width="4" height="6" fill="#5B6772"/><rect x="3" y="38" width="22" height="41" rx="8" fill="#12171C"/><rect x="3" y="51" width="22" height="3" fill="#F2B233"/><circle cx="14" cy="45" r="3.8" fill="#34404A"/><circle cx="14" cy="45" r="1.8" fill="#0A0D10"/><rect x="9" y="56" width="10" height="3" rx="1.5" fill="#34404A"/><rect x="6" y="61" width="16" height="9" rx="3" fill="#8FC7F0"/><rect x="6" y="61" width="16" height="3" rx="1.5" fill="#CDE8FA"/><circle class="hl" cx="9.5" cy="75" r="2" fill="#FFD36B"/><circle class="hl" cx="18.5" cy="75" r="2" fill="#FFD36B"/></svg></div><span class="beam"></span></div><div class="scenery" id="scenery" aria-hidden="true"></div><div class="puffs" id="puffs"></div></ol>
+      <ol class="route" id="route"><div class="features" id="features" aria-hidden="true"></div><svg class="tracksvg" id="trackSvg" aria-hidden="true"></svg><div class="features over" id="featuresTop" aria-hidden="true"></div><div class="train" id="train" aria-hidden="true"><div class="body"><svg width="28" height="82" viewBox="0 0 28 82"><g fill="#2B343C"><rect x="1" y="5" width="3" height="6" rx="1"/><rect x="24" y="5" width="3" height="6" rx="1"/><rect x="1" y="21" width="3" height="6" rx="1"/><rect x="24" y="21" width="3" height="6" rx="1"/><rect x="0" y="42" width="3" height="7" rx="1"/><rect x="25" y="42" width="3" height="7" rx="1"/><rect x="0" y="64" width="3" height="7" rx="1"/><rect x="25" y="64" width="3" height="7" rx="1"/></g><rect x="4" y="1" width="20" height="31" rx="6" fill="#12171C"/><rect x="11.5" y="5" width="5" height="23" rx="2.5" fill="#34404A"/><g fill="#8FC7F0"><rect x="5.5" y="6" width="2" height="4" rx="1"/><rect x="5.5" y="13" width="2" height="4" rx="1"/><rect x="5.5" y="20" width="2" height="4" rx="1"/><rect x="20.5" y="6" width="2" height="4" rx="1"/><rect x="20.5" y="13" width="2" height="4" rx="1"/><rect x="20.5" y="20" width="2" height="4" rx="1"/></g><rect x="4" y="26" width="20" height="2.5" fill="#F2B233"/><rect x="12" y="32" width="4" height="6" fill="#5B6772"/><rect x="3" y="38" width="22" height="41" rx="8" fill="#12171C"/><rect x="3" y="51" width="22" height="3" fill="#F2B233"/><circle cx="14" cy="45" r="3.8" fill="#34404A"/><circle cx="14" cy="45" r="1.8" fill="#0A0D10"/><rect x="9" y="56" width="10" height="3" rx="1.5" fill="#34404A"/><rect x="6" y="61" width="16" height="9" rx="3" fill="#8FC7F0"/><rect x="6" y="61" width="16" height="3" rx="1.5" fill="#CDE8FA"/><circle class="hl" cx="9.5" cy="75" r="2" fill="#FFD36B"/><circle class="hl" cx="18.5" cy="75" r="2" fill="#FFD36B"/></svg></div><span class="jet"><svg class="shadow" width="52" height="54" viewBox="0 0 52 54"><path d="M26 2c2 0 3 3 3 7v12l20 9v5l-20-5v13l6 5v4l-9-3-9 3v-4l6-5V35L3 40v-5l20-9V9c0-4 1-7 3-7z" fill="#12171C"/></svg><svg width="52" height="54" viewBox="0 0 52 54" style="position:absolute;left:0;top:0"><g transform="rotate(180 26 27)"><path d="M26 2c2 0 3 3 3 7v12l20 9v5l-20-5v13l6 5v4l-9-3-9 3v-4l6-5V35L3 40v-5l20-9V9c0-4 1-7 3-7z" fill="#fff" stroke="#12171C" stroke-width="1.6" stroke-linejoin="round"/><path d="M23 26l-19 9M29 26l19 9" stroke="#2563C9" stroke-width="2.4" stroke-linecap="round"/><rect x="24.5" y="5" width="3" height="5" rx="1.5" fill="#8FC7F0"/><path d="M22 47l4-1.5 4 1.5" stroke="#2563C9" stroke-width="2" fill="none" stroke-linecap="round"/></g></svg></span><span class="beam"></span></div><div class="scenery" id="scenery" aria-hidden="true"></div><div class="puffs" id="puffs"></div></ol>
       <div class="end"><span></span><i aria-hidden="true"></i><span>End of the line · back in Barcelona Mon Nov 2</span></div>
     </div>
   </section>
@@ -773,6 +815,9 @@ function buildTrack(){
       <path d="${d}" stroke="#9AA5AB" stroke-width="19" fill="none"/>
       <path id="litPath" d="${d}" stroke="#12171C" stroke-width="19" fill="none"/>
     </g>`;
+  const fpTop = `M ${cx + 64} ${railTop - 10} C ${cx + 40} ${railTop - 6} ${cx + 4} ${stY[0] - 34} ${cx} ${stY[0]}`;
+  const fpEnd = `M ${cx} ${stY[N - 1] + OFF} C ${cx} ${railEnd + 10} ${cx - 40} ${railEnd + 30} ${cx - 86} ${railEnd + 44}`;
+  trackSvg.insertAdjacentHTML('beforeend', `<path class="flightpath" d="${fpTop}"/><path class="flightpath" d="${fpEnd}"/><text class="fp-label" x="${cx - 96}" y="${railEnd + 62}">TO BCN</text>`);
   litPath = $('litPath');
   // sample the path once so the train can follow it cheaply
   const probe = document.createElementNS(svgNS, 'path'); probe.setAttribute('d', d);
@@ -891,6 +936,9 @@ function render(){
   const moving = Math.abs(tv) > 25;
   train.classList.toggle('moving', moving);
   if (Math.abs(tv) > 60) train.classList.toggle('up', tv < 0);
+  // flight days (the first and last stations) fly; everything in between rides the rails
+  const flying = ty < stY[0] + OFF + 45 || ty > stY[N - 1] + OFF - 45;
+  if (flying !== train.classList.contains('plane')) train.classList.toggle('plane', flying);
   for (let i = 0; i < signalEls.length; i++){
     const passed = ty - 40 > signals[i];
     signalEls[i].classList.toggle('green', passed);
@@ -912,6 +960,21 @@ function puff(now){
   if (moving) lastPuff = now; else lastIdle = now;
   const up = train.classList.contains('up');
   const rad = -pos.ang * Math.PI / 180, ux = Math.sin(rad), uy = Math.cos(rad);   // unit vector down the line
+  if (train.classList.contains('plane')){
+    if (!moving) return;                         // a parked plane doesn't smoke
+    const back0 = up ? 1 : -1;
+    for (const wx of [-15, 15]){
+      const t = document.createElement('span');
+      t.className = 'trail';
+      t.style.left = (pos.x + wx * uy).toFixed(1) + 'px';
+      t.style.top = (pos.y + back0 * 14).toFixed(1) + 'px';
+      t.style.setProperty('--a', (pos.ang).toFixed(1) + 'deg');
+      t.style.setProperty('--dy', (back0 * 26) + 'px');
+      puffs.appendChild(t);
+      t.addEventListener('animationend', () => t.remove());
+    }
+    return;
+  }
   const off = up ? -5 : 5;
   const back = up ? 1 : -1;
   const el = document.createElement('span');
@@ -1071,6 +1134,144 @@ function toast(text){
   setTimeout(() => { el.dataset.leaving = 'true'; setTimeout(() => { const j = toasts.indexOf(el); if (j >= 0) toasts.splice(j, 1); el.remove(); restack(); }, 240); }, 2200);
 }
 
+/* ============ LIVE: location-aware progress ============ */
+// Approximate coordinates; "term" is a tighter circle around the terminal buildings.
+const PLACES = [
+  { id:'bcn', name:'Barcelona El Prat', code:'BCN', kind:'airport', lat:41.2974, lon:2.0833, r:3500, term:{ lat:41.2887, lon:2.0732, r:900 } },
+  { id:'iad', name:'Washington Dulles', code:'IAD', kind:'airport', lat:38.9531, lon:-77.4565, r:4500, term:{ lat:38.9520, lon:-77.4510, r:1600 } },
+  { id:'yyz', name:'Toronto Pearson', code:'YYZ', kind:'airport', lat:43.6777, lon:-79.6248, r:4000, term:{ lat:43.6842, lon:-79.6164, r:1500 } },
+  { id:'ytz', name:'Billy Bishop (Toronto Island)', code:'YTZ', kind:'airport', lat:43.6275, lon:-79.3962, r:1500, term:{ lat:43.6310, lon:-79.3965, r:600 } },
+  { id:'mac', name:'McMaster University', code:'M', kind:'campus', lat:43.2609, lon:-79.9192, r:900 },
+  { id:'tmu', name:'Toronto Metropolitan University', code:'T', kind:'campus', lat:43.6577, lon:-79.3788, r:600 },
+  { id:'otu', name:'Ontario Tech University', code:'O', kind:'campus', lat:43.9454, lon:-78.8964, r:1000 },
+  { id:'dundas', name:'Dundas (home base)', code:'D', kind:'base', lat:43.2667, lon:-79.9542, r:3200 }
+];
+const K_LIVE = 'waypoint.live.on';
+const OUT_STEPS = [['bcn','BCN'],['air1','Flight'],['iad','IAD'],['air2','Flight'],['yyz','YYZ'],['dundas','Dundas']];
+const HOME_STEPS = [['dundas','Dundas'],['ytz','YTZ'],['air1','Flight'],['iad','IAD'],['air2','Flight'],['bcn','BCN']];
+let live = { on:false, state:'off', fix:null, place:null, inTerminal:false, flying:false, at:0, step:-1 };
+let watchId = null, lastPlaceId = null, flownFrom = null;
+function distM(a, b, c, d){ const R = 6371000, toR = x => x * Math.PI / 180; const dLat = toR(c - a), dLon = toR(d - b); const h = Math.sin(dLat / 2) ** 2 + Math.cos(toR(a)) * Math.cos(toR(c)) * Math.sin(dLon / 2) ** 2; return 2 * R * Math.asin(Math.sqrt(h)); }
+const fmtKm = m => m < 1000 ? `${Math.round(m / 10) * 10} m` : m < 20000 ? `${(m / 1000).toFixed(1)} km` : `${Math.round(m / 1000)} km`;
+function journey(){ const t = Date.now(); return t < Date.UTC(2026, 9, 28) ? 'out' : 'home'; }
+function classify(pos){
+  const { latitude:la, longitude:lo, speed, altitude } = pos.coords;
+  live.fix = { la, lo, acc:pos.coords.accuracy };
+  live.flying = (speed != null && speed > 60) || (altitude != null && altitude > 3000);
+  live.place = null; live.inTerminal = false;
+  if (!live.flying){
+    for (const p of PLACES){
+      if (p.term && distM(la, lo, p.term.lat, p.term.lon) < p.term.r){ live.place = p; live.inTerminal = true; break; }
+      if (distM(la, lo, p.lat, p.lon) < p.r){ live.place = p; break; }
+    }
+  }
+  if (live.place && live.place.kind === 'airport') flownFrom = live.place.id;
+  live.at = Date.now();
+  live.state = 'located';
+}
+function stepIndex(){
+  const steps = journey() === 'out' ? OUT_STEPS : HOME_STEPS;
+  if (live.flying){
+    // which flight leg? after Dulles it's the second one
+    return steps.findIndex(s => s[0] === (flownFrom === 'iad' ? 'air2' : 'air1'));
+  }
+  if (live.place) return steps.findIndex(s => s[0] === live.place.id);
+  return -1;
+}
+function nextEvent(){
+  // before the trip, the next thing is the flight out
+  if (todayIdx < 0) return { day:DAYS[0], it:{ title:'Fly BCN → IAD → YYZ', t:'TBC', kind:'flight' }, i:0 };
+  const now = Date.now(), base = Date.UTC(2026, 9, 23);
+  for (let i = Math.max(0, todayIdx); i < N; i++){
+    const d = DAYS[i];
+    for (const it of d.items){
+      const m = /^(\d{1,2}):(\d{2}) (AM|PM)$/.exec(it.t); if (!m) continue;
+      let h = +m[1] % 12 + (m[3] === 'PM' ? 12 : 0);
+      const offsetH = i >= 9 ? 5 : 4;   // EDT until Nov 1, EST after
+      const t = base + i * 86400000 + (h + offsetH) * 3600000 + (+m[2]) * 60000;
+      if (t > now) return { day:d, it, t, i };
+    }
+  }
+  return null;
+}
+function placeForEvent(ev){
+  if (!ev) return null;
+  const k = ev.it.kind;
+  if (k === 'school-mac') return PLACES.find(p => p.id === 'mac');
+  if (k === 'school-tmu') return PLACES.find(p => p.id === 'tmu');
+  if (k === 'school-otu') return PLACES.find(p => p.id === 'otu');
+  return null;
+}
+function liveHeadline(){
+  if (live.flying) return { h:'In the air', m:`Cruising ${flownFrom === 'iad' ? 'on the second leg' : 'on the first leg'} · enjoy the flight` };
+  const p = live.place;
+  if (p && p.kind === 'airport') return { h: live.inTerminal ? `In the terminal at ${p.code}` : `At ${p.code}`, m: p.name };
+  if (p && p.kind === 'campus') return { h:`On campus at ${p.name.split(' University')[0].replace('Toronto Metropolitan','TMU')}`, m:p.name };
+  if (p && p.kind === 'base') return { h:'Home base', m:'Dundas' };
+  if (live.fix){
+    let best = null, bd = Infinity; for (const q of PLACES){ const d = distM(live.fix.la, live.fix.lo, q.lat, q.lon); if (d < bd){ bd = d; best = q; } }
+    return { h:'On the move', m:`${fmtKm(bd)} from ${best.name}` };
+  }
+  return { h:'Finding you…', m:'Waiting for a location fix' };
+}
+const ICON_LOC = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2" fill="currentColor"/></svg>';
+function renderLive(){
+  const el = $('live');
+  if (!('geolocation' in navigator)){ el.innerHTML = `<div class="row1"><span class="ico">${ICON_LOC}</span><div><h2>Live progress</h2><span class="meta">This browser can't share its location.</span></div></div>`; return; }
+  if (!live.on){
+    el.className = 'live';
+    el.innerHTML = `<div class="row1"><span class="ico">${ICON_LOC}</span><div><h2>Live progress</h2><span class="meta">Turn on location and Waypoint shows when you're in the terminal, in the air or on campus.</span></div></div><button class="act press" id="liveOn" style="margin-top:12px;width:100%">Turn on live tracking</button>`;
+    $('liveOn').onclick = startLive; return;
+  }
+  if (live.state === 'denied'){
+    el.className = 'live';
+    el.innerHTML = `<div class="row1"><span class="ico">${ICON_LOC}</span><div><h2>Location is blocked</h2><span class="meta">Allow location for this site in your browser settings (on iPhone: Settings, Privacy &amp; Security, Location Services, Safari Websites), then try again.</span></div></div><button class="act press" id="liveOn" style="margin-top:12px;width:100%">Try again</button>`;
+    $('liveOn').onclick = startLive; return;
+  }
+  el.className = 'live on';
+  const { h, m } = liveHeadline();
+  const ago = live.at ? Math.max(0, Math.round((Date.now() - live.at) / 1000)) : null;
+  const steps = journey() === 'out' ? OUT_STEPS : HOME_STEPS;
+  const si = stepIndex();
+  const showSteps = live.flying || (live.place && (live.place.kind === 'airport' || si >= 0) && (todayIdx <= 0 || todayIdx >= N - 1 || live.place.kind === 'airport'));
+  const fillW = si < 0 ? 0 : (si / (steps.length - 1)) * 84;
+  const stepsHTML = showSteps ? `<ol class="steps-live" aria-label="Travel day progress"><span class="fill" style="width:${fillW}%"></span>${steps.map((st, i) => `<li class="${i < si ? 'done' : i === si ? 'now' : ''}"><i></i>${st[1]}</li>`).join('')}</ol>` : '';
+  const ev = nextEvent(), evPlace = placeForEvent(ev);
+  let next = '';
+  if (ev){
+    const when = ev.i === todayIdx ? ev.it.t : (ev.it.t === 'TBC' ? `${ev.day.dow} ${ev.day.mon} ${ev.day.d}` : `${ev.day.dow} ${ev.it.t}`);
+    let far = '';
+    if (evPlace && live.fix) far = ` · ${fmtKm(distM(live.fix.la, live.fix.lo, evPlace.lat, evPlace.lon))} away`;
+    next = `<div class="next">Next: <b>${esc(ev.it.title)}</b> · ${esc(when)}${far}</div>`;
+  }
+  el.innerHTML = `<div class="row1"><span class="ico"><span class="ping"></span>${ICON_LOC}</span><div style="min-width:0"><h2>${esc(h)}</h2><span class="meta">${esc(m)}${ago != null ? ` · updated ${ago < 5 ? 'just now' : ago + 's ago'}` : ''}</span></div><button class="act ghost press" id="liveOff" aria-label="Stop live tracking">Stop</button></div>${stepsHTML}${next}`;
+  $('liveOff').onclick = stopLive;
+  // put a YOU tag on today's station while the trip is on
+  stations.forEach((st, i) => st.classList.toggle('you', live.state === 'located' && i === todayIdx));
+}
+function startLive(){
+  live.on = true; live.state = 'waiting'; store.set(K_LIVE, true); renderLive();
+  try {
+    watchId = navigator.geolocation.watchPosition(pos => {
+      classify(pos);
+      const pid = live.place ? live.place.id + (live.inTerminal ? ':t' : '') : (live.flying ? 'air' : null);
+      if (pid !== lastPlaceId && pid){ lastPlaceId = pid; const { h } = liveHeadline(); toast(h); }
+      renderLive();
+    }, err => {
+      if (err.code === 1){ live.state = 'denied'; stopWatch(); }
+      renderLive();
+    }, { enableHighAccuracy:true, maximumAge:15000, timeout:30000 });
+  } catch(e){ live.state = 'denied'; renderLive(); }
+}
+function stopWatch(){ if (watchId != null){ try { navigator.geolocation.clearWatch(watchId); } catch(e){} watchId = null; } }
+function stopLive(){ stopWatch(); live = { on:false, state:'off', fix:null, place:null, inTerminal:false, flying:false, at:0, step:-1 }; store.set(K_LIVE, false); stations.forEach(st => st.classList.remove('you')); renderLive(); }
+setInterval(() => { if (live.on && live.state === 'located') renderLive(); }, 10000);
+window.liveSummary = () => {
+  if (!live.on) return 'Live location: off.';
+  if (live.state !== 'located') return 'Live location: on, no fix yet.';
+  const { h, m } = liveHeadline(); return `Live location right now: ${h} (${m}).`;
+};
+
 /* ============ tabs: directional transitions + sliding indicator ============ */
 let current = 'trip';
 const ORDER = ['trip','flights','schools','prep','ask'];
@@ -1126,6 +1327,7 @@ function tripContext(){
   return `You are the trip assistant inside Evan's travel app, "Waypoint". Evan is a student based in Barcelona, Spain; he's Canadian (born in Ontario) and also holds a Hungarian passport. He's visiting three Ontario universities for undergraduate engineering, Oct 23 – Nov 1, 2026, staying in Dundas (next to Hamilton) as his home base.
 
 Right now it is ${tz('America/Toronto')} in Ontario and ${tz('Europe/Madrid')} in Barcelona.
+${window.liveSummary ? window.liveSummary() : ''}
 
 How to answer:
 - Be casual, concise and practical, like a friend who planned the trip. Short paragraphs or a few bullets; no long essays.
@@ -1307,6 +1509,7 @@ async function send(text){
 
 /* ============ boot ============ */
 paintPrep(); renderScores(); renderChat();
+renderLive(); if (store.get(K_LIVE, false) && 'geolocation' in navigator) startLive();
 reveal($('headline'));
 setOpen(focusIdx, true);
 requestAnimationFrame(() => {
