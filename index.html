@@ -1,0 +1,1193 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F4F5F3">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Waypoint">
+<title>Waypoint · Ontario trip</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Overpass:wght@400;500;600;700;800;900&family=Overpass+Mono:wght@500;600;700&display=swap">
+<style>
+:root{
+  /* ground + ink */
+  --ground:#F4F5F3; --surface:#FFFFFF; --ink:#12171C; --ink-2:#3B4650; --ink-3:#5B6772; --rule:#E2E6E8; --rail:#D3D9DC;
+  /* lines */
+  --trunk:#12171C; --mac:#7A003C; --tmu:#0050A4; --otu:#C2410C; --air:#2563C9; --road:#2F7A5B; --cal:#6650B8; --todo:#9A6400;
+  /* states */
+  --warn-bg:#FFF1D6; --warn-fg:#5E3B00; --info-bg:#E6EEF2; --info-fg:#16384A; --ok-bg:#DDF1E5; --ok-fg:#175A35; --bad-bg:#FCE3DF; --bad-fg:#8C1C0E;
+  --sun:#F2B233;
+  /* motion (from the animate skill + Apple springs) */
+  --ease-out-quint:cubic-bezier(.23,1,.32,1); --ease-in-cubic:cubic-bezier(.32,0,.67,0); --ease-in-out-cubic:cubic-bezier(.645,.045,.355,1);
+  --spring:linear(0, 0.0275, 0.0958, 0.1876, 0.2902, 0.3947, 0.4951, 0.5876, 0.67, 0.7416, 0.8024, 0.8527, 0.8937, 0.9263, 0.9517, 0.971, 0.9852, 0.9954, 1.0024, 1.0069, 1.0096, 1.0108, 1.0111, 1.0107, 1.0099, 1.0088, 1.0077, 1.0065, 1.0054, 1.0044, 1.0035, 1.0028, 1.0021, 1.0016, 1.0011, 1.0008, 1.0005, 1.0003, 1.0001, 1);
+  --tabbar-h:64px; --safe-b:env(safe-area-inset-bottom,0px); --safe-t:env(safe-area-inset-top,0px);
+  --tabbar-space:calc(var(--tabbar-h) + var(--safe-b) + 12px);
+  --font:'Overpass',system-ui,-apple-system,sans-serif; --mono:'Overpass Mono',ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+html,body{margin:0;height:100%;background:var(--ground);overflow:hidden}
+body{font-family:var(--font);color:var(--ink);font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent;caret-color:var(--tmu)}
+::selection{background:var(--sun);color:var(--ink)}
+button,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2.5px solid var(--tmu);outline-offset:2px;border-radius:10px}
+.mono{font-family:var(--mono);font-weight:600;letter-spacing:-.01em}
+.press{transition:transform 160ms var(--ease-out-quint)}
+.press:active{transform:scale(.97);transition-duration:90ms}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+#app{position:fixed;inset:0;max-width:480px;margin:0 auto;background:var(--ground);overflow:hidden}
+@media (min-width:520px){#app{box-shadow:0 0 0 1px rgba(18,23,28,.06),0 30px 80px rgba(18,23,28,.12)}}
+
+/* views */
+.view{position:absolute;inset:0;display:flex;flex-direction:column;visibility:hidden}
+.view.on,.view.leaving{visibility:visible}
+.view.leaving{pointer-events:none;z-index:1}
+.scroll{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding-bottom:calc(var(--tabbar-space) + 28px);scrollbar-width:none}
+.scroll::-webkit-scrollbar{display:none}
+
+/* top bar: sticky, picks up a hairline + blur once content scrolls under it */
+.top{position:sticky;top:0;z-index:10;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:calc(10px + var(--safe-t)) 18px 10px;background:rgba(244,245,243,.86);-webkit-backdrop-filter:blur(16px) saturate(170%);backdrop-filter:blur(16px) saturate(170%);transition:box-shadow 200ms ease}
+.top.edge{box-shadow:0 1px 0 var(--rule)}
+.brand{display:flex;align-items:center;gap:9px;font-weight:800;font-size:17px;letter-spacing:-.01em}
+.pill{display:inline-flex;align-items:center;gap:6px;height:30px;padding:2px 12px 0;border-radius:999px;background:var(--surface);box-shadow:0 0 0 1px var(--rule);font-size:13px;font-weight:700;color:var(--ink-2);white-space:nowrap}
+
+/* line bullet: the signature atom (subway line roundel) */
+.bullet{--c:var(--trunk);flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:var(--c);color:#fff;font-weight:900;font-size:14px;line-height:1;padding-top:2px}
+.bullet.lg{width:46px;height:46px;font-size:24px}
+.bullet.sm{width:20px;height:20px;font-size:11px}
+
+.hero{padding:14px 18px 0}
+.hero h1{margin:0;font-size:clamp(32px,9.4vw,40px);line-height:1;letter-spacing:-.035em;font-weight:900;text-wrap:balance}
+.hero p{margin:10px 0 0;font-size:16px;line-height:1.4;color:var(--ink-2)}
+
+/* lines legend (jump to a school) */
+.lines{display:flex;gap:8px;padding:16px 18px 4px;overflow-x:auto;scrollbar-width:none}
+.lines::-webkit-scrollbar{display:none}
+.line-chip{display:flex;align-items:center;gap:8px;flex:0 0 auto;min-height:44px;padding:6px 14px 4px 6px;border:0;border-radius:999px;background:var(--surface);box-shadow:0 0 0 1px var(--rule);text-align:left}
+.line-chip .lt b{display:block;font-size:14px;font-weight:800;line-height:1.1}
+.line-chip .lt span{display:block;font-size:12px;color:var(--ink-3);font-weight:600}
+
+/* the route */
+.route{position:relative;list-style:none;margin:18px 0 0;padding:0 18px}
+.route{--tx:calc(18px + 64px + 18px + 14px)}
+/* track: sleepers + two rails, with the travelled part lit */
+.track{position:absolute;left:calc(var(--tx) - 15px);width:30px;top:0;height:0;z-index:0;pointer-events:none}
+.track::before{content:"";position:absolute;inset:0 2px;background:repeating-linear-gradient(to bottom,#CDBFAE 0 4px,transparent 4px 13px);border-radius:3px;opacity:.9}
+.track::after{content:"";position:absolute;top:0;bottom:0;left:7px;right:7px;border-left:3px solid #9AA5AB;border-right:3px solid #9AA5AB}
+.track .lit{position:absolute;top:0;left:7px;right:7px;height:0;border-left:3px solid var(--trunk);border-right:3px solid var(--trunk);z-index:1}
+/* the train (top-down, nose pointing down the line) */
+.train{position:absolute;left:calc(var(--tx) - 14px);top:0;width:28px;height:82px;z-index:4;pointer-events:none;will-change:transform}
+.train .body{width:28px;height:82px;transition:transform 520ms var(--spring);transform-origin:50% 50%}
+.train.up .body{transform:rotate(180deg)}
+.train.moving .body svg{animation:chug 180ms linear infinite alternate}
+@keyframes chug{from{transform:translateX(-.6px)}to{transform:translateX(.6px)}}
+.train .beam{position:absolute;left:50%;top:76px;width:46px;height:70px;margin-left:-23px;background:radial-gradient(ellipse at 50% 0,rgba(242,178,51,.55),rgba(242,178,51,0) 70%);opacity:.35;transition:opacity 300ms ease}
+.train.moving .beam{opacity:1}
+.train.up .beam{transform:rotate(180deg);transform-origin:50% -35px}
+.puffs{position:absolute;inset:0;pointer-events:none;z-index:5}
+.puff{position:absolute;width:22px;height:22px;margin:-11px 0 0 -11px;border-radius:50%;
+  background:radial-gradient(circle at 38% 35%,rgba(255,255,255,.95) 0 18%,rgba(196,202,207,.95) 42%,rgba(118,127,134,.92) 100%);
+  box-shadow:0 2px 6px rgba(18,23,28,.18);animation:puff var(--life,1600ms) cubic-bezier(.23,1,.32,1) forwards;will-change:transform,opacity}
+.puff.dark{background:radial-gradient(circle at 38% 35%,rgba(210,214,218,.95) 0 15%,rgba(120,128,135,.95) 45%,rgba(64,71,78,.9) 100%)}
+@keyframes puff{0%{transform:translate(0,0) scale(.35);opacity:0}12%{opacity:1}100%{transform:translate(var(--dx),var(--dy)) scale(var(--s,2.8));opacity:0}}
+/* trackside scenery */
+.scenery{position:absolute;inset:0;pointer-events:none;z-index:1}
+.tree{position:absolute;width:var(--sz);height:var(--sz);margin:calc(var(--sz) / -2) 0 0 calc(var(--sz) / -2);border-radius:50%;background:radial-gradient(circle at 35% 30%,rgba(255,255,255,.35),transparent 45%),var(--c);box-shadow:2px 3px 0 rgba(18,23,28,.12)}
+.tree.c2::after{content:"";position:absolute;width:70%;height:70%;right:-35%;top:20%;border-radius:50%;background:inherit;box-shadow:inherit}
+.bush{position:absolute;width:9px;height:7px;margin:-3px 0 0 -4px;border-radius:50%;background:#6E8B3D;box-shadow:5px 1px 0 -1px #7E9B45,2px 1px 2px rgba(18,23,28,.12)}
+.signal{position:absolute;width:10px;height:22px;margin:-11px 0 0 -5px;border-radius:5px;background:#1F262C;box-shadow:0 2px 3px rgba(18,23,28,.2)}
+.signal::before,.signal::after{content:"";position:absolute;left:2.5px;width:5px;height:5px;border-radius:50%;background:#3A444C;transition:background 200ms ease,box-shadow 200ms ease}
+.signal::before{top:3px}.signal::after{bottom:3px}
+.signal.red::before{background:#FF5A4A;box-shadow:0 0 6px 2px rgba(255,90,74,.7)}
+.signal.green::after{background:#3DDC84;box-shadow:0 0 6px 2px rgba(61,220,132,.7)}
+.lamp{position:absolute;width:6px;height:6px;margin:-3px 0 0 -3px;border-radius:50%;background:#FFE29A;box-shadow:0 0 0 2px #2B343C,0 0 8px 3px rgba(255,214,107,.45)}
+.leaf{position:absolute;width:9px;height:9px;margin:-4px 0 0 -4px;border-radius:0 70% 0 70%;background:var(--c);z-index:6;animation:leaf 1300ms cubic-bezier(.23,1,.32,1) forwards}
+@keyframes leaf{0%{transform:translate(0,0) rotate(0) scale(.6);opacity:0}15%{opacity:1}100%{transform:translate(var(--dx),var(--dy)) rotate(var(--r)) scale(1);opacity:0}}
+.stn{position:relative;display:grid;grid-template-columns:64px 28px minmax(0,1fr);column-gap:18px}
+.stn + .stn{margin-top:4px}
+.stn .date{padding-top:12px;text-align:right}
+.stn .date em{font-style:normal}
+.stn .date b{display:block;font-size:24px;font-weight:900;line-height:1;letter-spacing:-.03em}
+.stn .date span{display:block;margin-top:3px;font-size:12px;font-weight:700;color:var(--ink-3);text-transform:uppercase;letter-spacing:.04em}
+.stn .mark{position:relative;z-index:2;display:flex;justify-content:center;padding-top:12px}
+.stn .plat{position:absolute;top:14px;left:50%;width:40px;height:16px;margin-left:-20px;border-radius:5px;background:#E4E8EA;box-shadow:inset 0 0 0 1px #D3D9DC;z-index:-1}
+.stn .mark > *:not(.plat){transition:transform 460ms var(--spring),box-shadow 300ms ease}
+.stn.arrived .mark > *:not(.plat){transform:scale(1.18)}
+.stn .sign{display:inline-block;margin-top:7px;padding:3px 6px 1px;border-radius:4px;background:var(--surface);box-shadow:0 0 0 1px var(--rule);color:var(--ink-2);font-size:10.5px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;transition:background 260ms ease,color 260ms ease,box-shadow 260ms ease}
+.stn.arrived .sign{background:var(--sun);color:var(--ink);box-shadow:none}
+.dotm{width:20px;height:20px;border-radius:50%;background:var(--surface);border:4px solid var(--trunk);transition:transform 420ms var(--spring)}
+.stn.past .dotm{background:var(--trunk)}
+.stn .mark .bullet{margin-top:-3px;box-shadow:0 0 0 4px var(--ground)}
+.stn.here .mark::before{content:"";position:absolute;top:6px;left:50%;width:32px;height:32px;margin-left:-16px;border-radius:50%;background:var(--sun);opacity:.35;animation:here 2.4s ease-out infinite}
+@keyframes here{0%{transform:scale(.6);opacity:.55}100%{transform:scale(1.6);opacity:0}}
+.stn > button{grid-column:3;grid-row:1;display:block;width:100%;text-align:left;border:0;background:transparent;padding:10px 0 14px;border-radius:14px}
+.stn h2{margin:0;display:flex;align-items:center;gap:8px;font-size:21px;line-height:1.15;font-weight:800;letter-spacing:-.02em}
+.stn h2 svg{flex:0 0 auto;margin-left:auto;color:var(--ink-3);transition:transform 460ms var(--ease-out-quint)}
+.stn.open h2 svg{transform:rotate(180deg)}
+.stn .sub{display:block;margin-top:4px;font-size:15px;line-height:1.35;color:var(--ink-2)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.tag{display:inline-flex;align-items:center;gap:5px;height:26px;padding:2px 10px 0;border-radius:999px;font-size:13px;font-weight:700;white-space:nowrap}
+.tag.time{background:var(--surface);box-shadow:0 0 0 1px var(--rule);color:var(--ink)}
+.here-tag{display:inline-flex;height:22px;align-items:center;padding:2px 8px 0;border-radius:999px;background:var(--sun);color:var(--ink);font-size:12px;font-weight:800}
+
+/* expanding detail (animate height via grid rows) */
+.grow{grid-column:3;display:grid;grid-template-rows:0fr;transition:grid-template-rows 520ms var(--ease-out-quint)}
+.open > .grow{grid-template-rows:1fr}
+.grow > div{overflow:hidden;min-height:0}
+.detail{padding:0 0 18px;opacity:0;transform:translateY(-6px);transition:opacity 240ms ease,transform 400ms var(--ease-out-quint)}
+.open .detail{opacity:1;transform:none;transition-delay:80ms}
+.where{display:flex;gap:8px;align-items:flex-start;font-size:15px;font-weight:700;line-height:1.35}
+.where svg{flex:0 0 18px;margin-top:1px}
+.note{margin-top:12px;display:flex;gap:10px;padding:12px 14px 10px;border-radius:14px;font-size:15px;line-height:1.45}
+.note.info{background:var(--info-bg);color:var(--info-fg)}
+.note.warn{background:var(--warn-bg);color:var(--warn-fg)}
+.note svg{flex:0 0 18px;margin-top:2px}
+.stops{list-style:none;margin:14px 0 0;padding:0;background:var(--surface);border-radius:18px;box-shadow:0 1px 2px rgba(18,23,28,.05)}
+.stops li{display:grid;grid-template-columns:10px minmax(0,1fr);column-gap:12px;padding:13px 14px 11px}
+.stops li + li{border-top:1px solid var(--rule)}
+.stops .t{display:block;font-size:12.5px;color:var(--ink-3);margin-bottom:2px}
+.stops .k{width:10px;height:10px;border-radius:50%;margin-top:4px}
+.stops h3{margin:0;font-size:16px;line-height:1.3;font-weight:800}
+.stops p{margin:3px 0 0;font-size:14.5px;line-height:1.45;color:var(--ink-2)}
+.stops .row{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px}
+.end{display:grid;grid-template-columns:64px 28px minmax(0,1fr);column-gap:18px;padding:14px 18px 0;color:var(--ink-3);font-size:14px;font-weight:600}
+#tripScroll{padding-bottom:calc(var(--tabbar-space) + 18vh)}
+.end{padding-bottom:8px}
+.end i{justify-self:center;width:34px;height:8px;border-radius:3px;background:var(--trunk);margin-top:6px;box-shadow:0 -6px 0 -2px #9AA5AB}
+
+/* section heads used on other tabs */
+.sec{padding:30px 18px 0}
+.sec > h2{margin:0;font-size:24px;line-height:1.1;letter-spacing:-.025em;font-weight:900}
+.sec > p{margin:8px 0 0;font-size:15px;line-height:1.45;color:var(--ink-2)}
+
+/* flights as journeys */
+.journey{margin-top:14px;background:var(--surface);border-radius:22px;padding:18px 18px 8px;box-shadow:0 1px 2px rgba(18,23,28,.05),0 10px 26px rgba(18,23,28,.06)}
+.journey > header{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:14px;font-weight:800;color:var(--ink-2)}
+.jl{position:relative;list-style:none;margin:14px 0 0;padding:0}
+.jl::before{content:"";position:absolute;left:12px;top:16px;bottom:30px;width:4px;margin-left:-2px;border-radius:4px;background:var(--air)}
+.ap{position:relative;display:grid;grid-template-columns:24px minmax(0,1fr) auto;column-gap:14px;align-items:start;padding-bottom:12px}
+.ap .m{width:24px;height:24px;border-radius:50%;background:var(--surface);border:5px solid var(--air);margin-top:3px;position:relative;z-index:1}
+.ap.change .m{border-width:4px;box-shadow:0 0 0 4px var(--surface),0 0 0 7px var(--air);width:22px;height:22px;margin:4px 1px 0}
+.ap .code{font-size:30px;font-weight:700;line-height:1;letter-spacing:-.02em}
+.ap .city{display:block;margin-top:3px;font-size:14px;color:var(--ink-2)}
+.leg{position:relative;display:grid;grid-template-columns:24px minmax(0,1fr);column-gap:14px;padding:0 0 14px}
+.leg svg{justify-self:center;margin-top:2px;background:var(--surface);position:relative;z-index:1}
+.leg dl{margin:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;padding:10px 12px 8px;border-radius:12px;background:var(--ground)}
+.leg dt{font-size:12px;font-weight:700;color:var(--ink-3)}
+.leg dd{margin:1px 0 0;font-size:14px;color:var(--ink-3)}
+.change-btn{grid-column:2 / 4;margin-top:6px;display:flex;justify-content:space-between;align-items:center;gap:8px;width:100%;min-height:44px;border:0;border-radius:12px;padding:8px 12px 6px;background:#EAF1FB;color:#163A73;font-size:14px;font-weight:800;text-align:left}
+.change-btn svg{transition:transform 460ms var(--ease-out-quint)}
+.ap.open .change-btn svg{transform:rotate(180deg)}
+.ap .grow{grid-column:2 / 4}
+.steps{list-style:none;margin:8px 0 0;padding:0;counter-reset:s}
+.steps li{display:grid;grid-template-columns:24px minmax(0,1fr);column-gap:10px;padding:8px 0}
+.steps li::before{counter-increment:s;content:counter(s);width:24px;height:24px;border-radius:50%;background:var(--air);color:#fff;font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center;padding-top:2px}
+.steps b{display:block;font-size:15px;font-weight:800;line-height:1.3}
+.steps span{display:block;margin-top:2px;font-size:14px;line-height:1.45;color:var(--ink-2)}
+.gap{margin-top:14px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.gap div{background:var(--surface);border-radius:16px;padding:14px 12px 10px;box-shadow:0 0 0 1px var(--rule)}
+.gap div.now{background:var(--warn-bg);box-shadow:none}
+.gap b{display:block;font-size:26px;font-weight:900;letter-spacing:-.03em;line-height:1}
+.gap span{display:block;margin-top:6px;font-size:13px;line-height:1.3;color:var(--ink-2);font-weight:600}
+
+/* schools as lines */
+.school{margin-top:14px;background:var(--surface);border-radius:24px;overflow:hidden;box-shadow:0 1px 2px rgba(18,23,28,.05),0 10px 26px rgba(18,23,28,.06)}
+.school > button{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:14px;align-items:center;width:100%;border:0;background:var(--c);color:#fff;padding:18px 18px 16px;text-align:left}
+.school .bullet{background:#fff;color:var(--c)}
+.school .nm{display:block;font-size:21px;font-weight:900;letter-spacing:-.02em;line-height:1.1}
+.school .wh{display:block;margin-top:4px;font-size:14px;font-weight:600;opacity:.92}
+.school .chev{transition:transform 460ms var(--ease-out-quint)}
+.school.open .chev{transform:rotate(180deg)}
+.school .status{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:12px 18px 10px;border-bottom:1px solid var(--rule);font-size:14px;font-weight:700;color:var(--ink-2)}
+.school dl{margin:0;padding:4px 18px 16px}
+.school dl > div{padding:12px 0 10px}
+.school dl > div + div{border-top:1px solid var(--rule)}
+.school dt{font-size:13px;font-weight:800;color:var(--c)}
+.school dd{margin:3px 0 0;font-size:15px;line-height:1.45;color:var(--ink-2)}
+
+/* prep: checklist as stations */
+.meter{margin-top:16px;position:relative;height:28px}
+.meter .r{position:absolute;left:0;right:0;top:12px;height:4px;border-radius:4px;background:var(--rail)}
+.meter .f{position:absolute;left:0;top:12px;height:4px;width:100%;border-radius:4px;background:var(--trunk);transform-origin:left;transform:scaleX(0);transition:transform 700ms var(--spring)}
+.meter .train{position:absolute;top:4px;left:0;width:20px;height:20px;margin-left:-10px;border-radius:50%;background:var(--sun);box-shadow:0 0 0 4px var(--ground),0 2px 6px rgba(18,23,28,.2);transition:left 700ms var(--spring)}
+.checks{position:relative;list-style:none;margin:12px 0 0;padding:0;background:var(--surface);border-radius:20px;box-shadow:0 1px 2px rgba(18,23,28,.05)}
+.checks::before{content:"";position:absolute;left:30px;top:24px;bottom:24px;width:3px;margin-left:-1.5px;background:var(--rail);border-radius:3px}
+.ck{position:relative;width:100%;min-height:56px;display:grid;grid-template-columns:28px minmax(0,1fr);gap:14px;align-items:start;text-align:left;border:0;background:transparent;padding:14px 16px 12px}
+.ck .box{position:relative;z-index:1;width:28px;height:28px;border-radius:50%;background:var(--surface);border:3px solid var(--ink-3);display:flex;align-items:center;justify-content:center;transition:background 180ms ease,border-color 180ms ease,transform 460ms var(--spring);transform:scale(.86)}
+.ck .box path{stroke-dasharray:24;stroke-dashoffset:24;transition:stroke-dashoffset 300ms var(--ease-out-quint) 80ms}
+.ck[aria-checked="true"] .box{background:var(--trunk);border-color:var(--trunk);transform:scale(1)}
+.ck[aria-checked="true"] .box path{stroke-dashoffset:0}
+.ck .tt{display:block;font-size:16px;font-weight:700;line-height:1.35;padding-top:3px;transition:color 200ms ease}
+.ck[aria-checked="true"] .tt{color:var(--ink-3);text-decoration:line-through;text-decoration-thickness:2px;text-decoration-color:rgba(91,103,114,.5)}
+.ck .nt{display:block;margin-top:2px;font-size:14px;line-height:1.4;color:var(--ink-3)}
+.score{margin-top:10px;background:var(--surface);border-radius:20px;padding:14px 16px 8px;box-shadow:0 1px 2px rgba(18,23,28,.05)}
+.score .h{display:flex;align-items:center;gap:10px}
+.score h3{margin:0;flex:1;font-size:18px;font-weight:900;letter-spacing:-.01em}
+.score .sum{font-size:16px}
+.score .r{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:2px 0}
+.score .r > span{font-size:15px;color:var(--ink-2);font-weight:600}
+.dots{display:flex}
+.dots button{width:34px;height:42px;border:0;background:transparent;padding:0;display:flex;align-items:center;justify-content:center}
+.dots i{width:18px;height:18px;border-radius:50%;border:3px solid var(--c);background:var(--surface);transform:scale(.82);transition:background 160ms ease,transform 380ms var(--spring)}
+.dots button.on i{background:var(--c);transform:scale(1)}
+.qs{margin:12px 0 0;padding:0;list-style:none;background:var(--surface);border-radius:20px;box-shadow:0 1px 2px rgba(18,23,28,.05)}
+.qs li{display:grid;grid-template-columns:26px minmax(0,1fr);gap:12px;padding:14px 16px 12px;font-size:16px;line-height:1.45;color:var(--ink)}
+.qs li + li{border-top:1px solid var(--rule)}
+
+/* chat */
+.msgs{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 18px 16px;display:flex;flex-direction:column;gap:12px;scrollbar-width:none}
+.msg{max-width:86%;font-size:16px;line-height:1.5;animation:msgin 420ms var(--ease-out-quint) backwards;overflow-wrap:anywhere}
+@keyframes msgin{from{opacity:0;transform:translateY(8px) scale(.98)}}
+.msg.me{align-self:flex-end;background:var(--ink);color:#fff;padding:10px 14px 8px;border-radius:20px 20px 6px 20px}
+.msg.ai{align-self:flex-start;background:var(--surface);padding:12px 16px 10px;border-radius:20px 20px 20px 6px;box-shadow:0 1px 2px rgba(18,23,28,.05)}
+.msg.ai p{margin:0}
+.msg.ai p + p,.msg.ai ul + p,.msg.ai p + ul,.msg.ai ol + p,.msg.ai p + ol{margin-top:8px}
+.msg.ai ul,.msg.ai ol{margin:0;padding-left:20px}
+.msg.err{align-self:stretch;max-width:none;background:var(--bad-bg);color:var(--bad-fg);padding:12px 14px;border-radius:14px;font-size:15px}
+.typing{display:inline-flex;gap:4px;padding:4px 0}
+.typing i{width:7px;height:7px;border-radius:50%;background:var(--ink-3);animation:bob 1.1s ease-in-out infinite}
+.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+@keyframes bob{0%,80%,100%{transform:translateY(0);opacity:.5}40%{transform:translateY(-4px);opacity:1}}
+.sugs{display:flex;flex-wrap:wrap;gap:8px}
+.sug{border:0;background:var(--surface);box-shadow:0 0 0 1px var(--rule);border-radius:999px;padding:11px 14px 9px;font-size:15px;font-weight:700;text-align:left;min-height:44px}
+.composer{flex-shrink:0;padding:8px 14px calc(var(--tabbar-space) + 12px)}
+.composer form{display:flex;gap:8px;align-items:flex-end;background:var(--surface);border-radius:26px;padding:6px 6px 6px 16px;box-shadow:0 0 0 1px var(--rule),0 8px 20px rgba(18,23,28,.06)}
+.composer textarea{flex:1 1 auto;border:0;outline:0;resize:none;background:transparent;font-size:16px;line-height:1.4;padding:10px 0 7px;max-height:120px}
+.send{flex:0 0 44px;width:44px;height:44px;border:0;border-radius:50%;background:var(--ink);color:#fff;display:flex;align-items:center;justify-content:center}
+.send:disabled{background:#B7C0C6}
+.iconbtn{border:0;background:var(--surface);box-shadow:0 0 0 1px var(--rule);color:var(--ink);border-radius:50%;width:44px;height:44px;display:inline-flex;align-items:center;justify-content:center}
+.keycard{margin:8px 18px 0;background:var(--surface);border-radius:22px;padding:18px;box-shadow:0 1px 2px rgba(18,23,28,.05)}
+.keycard h2{margin:0;font-size:22px;font-weight:900;letter-spacing:-.02em}
+.keycard p{margin:6px 0 0;font-size:15px;line-height:1.45;color:var(--ink-2)}
+.keycard label{display:block;margin-top:14px;font-size:14px;font-weight:800}
+.keycard input{width:100%;margin-top:6px;border:1.5px solid var(--rail);border-radius:12px;padding:12px 14px 10px;font-size:16px;background:#fff}
+.keycard input:focus{outline:0;border-color:var(--ink);box-shadow:0 0 0 3px rgba(18,23,28,.1)}
+.btn{margin-top:12px;width:100%;min-height:48px;border:0;border-radius:14px;background:var(--ink);color:#fff;font-weight:800;font-size:16px;padding-top:3px}
+.btn.ghost{background:transparent;color:var(--ink);box-shadow:0 0 0 1.5px var(--rail)}
+.fine{margin-top:12px !important;font-size:13px !important;color:var(--ink-3) !important}
+
+/* floating tab bar with sliding indicator */
+.tabbar{position:absolute;left:14px;right:14px;bottom:calc(var(--safe-b) + 10px);z-index:20;height:var(--tabbar-h);padding:6px;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));border-radius:999px;background:rgba(255,255,255,.94);-webkit-backdrop-filter:blur(20px) saturate(180%);backdrop-filter:blur(20px) saturate(180%);box-shadow:0 0 0 1px rgba(18,23,28,.06),0 12px 32px rgba(18,23,28,.16)}
+.tab-ind{position:absolute;top:6px;left:6px;height:calc(100% - 12px);border-radius:999px;background:var(--ink);pointer-events:none;will-change:transform;transition:transform 560ms var(--spring),width 560ms var(--spring)}
+.tab{position:relative;z-index:1;border:0;background:transparent;border-radius:999px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;color:var(--ink-3);font-size:11px;font-weight:700;min-height:52px;padding-top:2px;transition:color 220ms ease}
+.tab svg{width:22px;height:22px;transition:transform 360ms var(--spring)}
+.tab:active svg{transform:scale(.86)}
+.tab[aria-current="page"]{color:#fff}
+
+/* toasts */
+.toaster{position:absolute;left:16px;right:16px;bottom:calc(var(--tabbar-space) + 12px);z-index:30;pointer-events:none;--gap:8px}
+.toast{position:absolute;left:0;right:0;bottom:0;display:flex;align-items:center;gap:10px;padding:13px 14px 11px;border-radius:16px;background:var(--ink);color:#fff;font-size:15px;font-weight:700;box-shadow:0 10px 30px rgba(18,23,28,.25);transform:translateY(calc(100% + 24px)) scale(.96);opacity:0;transition:transform 420ms var(--ease-out-quint),opacity 300ms var(--ease-out-quint)}
+.toast[data-mounted="true"]{transform:translateY(calc(var(--index) * (100% + var(--gap)) * -1)) scale(calc(1 - var(--index) * .04));opacity:calc(1 - var(--index) * .25)}
+.toast[data-leaving="true"]{transform:translateY(12px) scale(.96);opacity:0;transition:transform 220ms var(--ease-in-cubic),opacity 180ms var(--ease-in-cubic)}
+.toast i{width:22px;height:22px;flex:0 0 22px;border-radius:50%;background:var(--sun);display:flex;align-items:center;justify-content:center;margin-top:-2px}
+
+/* text reveal */
+.w{display:inline-block;overflow:hidden;vertical-align:top;padding-bottom:.1em;margin-bottom:-.1em}
+.w > span{display:inline-block;animation:reveal 1100ms cubic-bezier(.19,1,.22,1) backwards;animation-delay:calc(var(--i) * 26ms)}
+@keyframes reveal{from{transform:translateY(105%);opacity:0}}
+
+@media (hover:hover){
+  .journey,.school{transition:transform 220ms var(--ease-out-quint),box-shadow 220ms var(--ease-out-quint)}
+  .journey:hover,.school:hover{transform:translateY(-3px);box-shadow:0 1px 2px rgba(18,23,28,.05),0 18px 36px rgba(18,23,28,.1)}
+  .line-chip:hover,.sug:hover{box-shadow:0 0 0 1.5px var(--ink-3)}
+}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation:none !important}
+  .train .body,.stn .mark > *,.signal::before,.signal::after,.grow,.detail,.dotm,.meter .f,.meter .train,.ck .box,.tab svg,.tab-ind,.toast,.chev,.stn h2 svg{transition-duration:1ms !important}
+  .press:active{transform:none}
+}
+@media (prefers-reduced-transparency: reduce){.tabbar,.top{background:var(--ground);-webkit-backdrop-filter:none;backdrop-filter:none}}
+@media (prefers-contrast: more){:root{--ink-3:#3B4650;--rule:#AEB7BC;--rail:#9AA5AB}}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- TRIP -->
+  <section class="view on" id="v-trip" aria-label="Trip">
+    <div class="scroll" id="tripScroll">
+      <div class="top"><span class="brand"><span class="bullet sm" aria-hidden="true">W</span>Waypoint</span><span class="pill">Oct 23 – Nov 1</span></div>
+      <div class="hero">
+        <h1 id="headline">Ontario trip</h1>
+        <p>10 days, 3 universities, 4 flights. Tap a station for the plan.</p>
+      </div>
+      <nav class="lines" aria-label="Jump to a school" id="lines"></nav>
+      <ol class="route" id="route"><div class="track" id="track" aria-hidden="true"><span class="lit" id="lit"></span></div><div class="train" id="train" aria-hidden="true"><div class="body"><svg width="28" height="82" viewBox="0 0 28 82"><g fill="#2B343C"><rect x="1" y="5" width="3" height="6" rx="1"/><rect x="24" y="5" width="3" height="6" rx="1"/><rect x="1" y="21" width="3" height="6" rx="1"/><rect x="24" y="21" width="3" height="6" rx="1"/><rect x="0" y="42" width="3" height="7" rx="1"/><rect x="25" y="42" width="3" height="7" rx="1"/><rect x="0" y="64" width="3" height="7" rx="1"/><rect x="25" y="64" width="3" height="7" rx="1"/></g><rect x="4" y="1" width="20" height="31" rx="6" fill="#12171C"/><rect x="11.5" y="5" width="5" height="23" rx="2.5" fill="#34404A"/><g fill="#8FC7F0"><rect x="5.5" y="6" width="2" height="4" rx="1"/><rect x="5.5" y="13" width="2" height="4" rx="1"/><rect x="5.5" y="20" width="2" height="4" rx="1"/><rect x="20.5" y="6" width="2" height="4" rx="1"/><rect x="20.5" y="13" width="2" height="4" rx="1"/><rect x="20.5" y="20" width="2" height="4" rx="1"/></g><rect x="4" y="26" width="20" height="2.5" fill="#F2B233"/><rect x="12" y="32" width="4" height="6" fill="#5B6772"/><rect x="3" y="38" width="22" height="41" rx="8" fill="#12171C"/><rect x="3" y="51" width="22" height="3" fill="#F2B233"/><circle cx="14" cy="45" r="3.8" fill="#34404A"/><circle cx="14" cy="45" r="1.8" fill="#0A0D10"/><rect x="9" y="56" width="10" height="3" rx="1.5" fill="#34404A"/><rect x="6" y="61" width="16" height="9" rx="3" fill="#8FC7F0"/><rect x="6" y="61" width="16" height="3" rx="1.5" fill="#CDE8FA"/><circle class="hl" cx="9.5" cy="75" r="2" fill="#FFD36B"/><circle class="hl" cx="18.5" cy="75" r="2" fill="#FFD36B"/></svg></div><span class="beam"></span></div><div class="scenery" id="scenery" aria-hidden="true"></div><div class="puffs" id="puffs"></div></ol>
+      <div class="end"><span></span><i aria-hidden="true"></i><span>End of the line · back in Barcelona Mon Nov 2</span></div>
+    </div>
+  </section>
+
+  <!-- FLIGHTS -->
+  <section class="view" id="v-flights" aria-label="Flights">
+    <div class="scroll">
+      <div class="top"><span class="brand"><span class="bullet sm" aria-hidden="true">W</span>Waypoint</span><span class="pill">4 flights</span></div>
+      <div class="hero">
+        <h1>Flights</h1>
+        <p>Both ways through Washington Dulles. You land at Pearson and fly home from Toronto Island.</p>
+      </div>
+      <div style="padding:0 18px" id="journeys"></div>
+      <section class="sec">
+        <h2>The time gap moves twice</h2>
+        <p>Europe changes its clocks Oct 25, Ontario on Nov 1. Calls home drift by an hour in between.</p>
+        <div class="gap">
+          <div><b>+6h</b><span>Oct 23–24<br>Barcelona ahead</span></div>
+          <div class="now"><b>+5h</b><span>Oct 25–31<br>Barcelona ahead</span></div>
+          <div><b>+6h</b><span>Nov 1<br>flight home</span></div>
+        </div>
+      </section>
+      <section class="sec">
+        <h2>Passport</h2>
+        <p>Use your Canadian passport the whole way. Canadian citizens need it to fly into Canada, even with a second nationality, and it means no ESTA for the Dulles connections.</p>
+      </section>
+    </div>
+  </section>
+
+  <!-- SCHOOLS -->
+  <section class="view" id="v-schools" aria-label="Schools">
+    <div class="scroll">
+      <div class="top"><span class="brand"><span class="bullet sm" aria-hidden="true">W</span>Waypoint</span><span class="pill" id="bookedCount">1 of 3 booked</span></div>
+      <div class="hero">
+        <h1>Three lines, three days</h1>
+        <p>Back to back along the lake, Wed to Fri. Drive times are from Dundas.</p>
+      </div>
+      <div style="padding:0 18px" id="schools"></div>
+    </div>
+  </section>
+
+  <!-- PREP -->
+  <section class="view" id="v-prep" aria-label="Prep">
+    <div class="scroll">
+      <div class="top"><span class="brand"><span class="bullet sm" aria-hidden="true">W</span>Waypoint</span><span class="pill" id="prepCount"></span></div>
+      <div class="hero">
+        <h1 id="prepHead">Prep</h1>
+        <div class="meter" role="progressbar" aria-label="Checklist progress" id="progBar"><span class="r"></span><span class="f" id="progFill"></span><span class="train" id="progTrain" aria-hidden="true"></span></div>
+      </div>
+      <div id="groups"></div>
+      <section class="sec">
+        <h2>Score each school</h2>
+        <p>Rate right after each tour, out of 5. The totals help you rank them on Halloween.</p>
+        <div id="scores"></div>
+      </section>
+      <section class="sec">
+        <h2>Ask on every tour</h2>
+        <ol class="qs" id="questions"></ol>
+      </section>
+    </div>
+  </section>
+
+  <!-- ASK -->
+  <section class="view" id="v-ask" aria-label="Ask about the trip">
+    <div class="top"><span class="brand"><span class="bullet sm" aria-hidden="true">W</span>Ask Waypoint</span>
+      <span style="display:flex;gap:8px">
+        <button class="iconbtn press" id="clearBtn" aria-label="Clear conversation"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16"/><path d="M10 11v6M14 11v6"/><path d="M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12"/><path d="M9 7V4h6v3"/></svg></button>
+        <button class="iconbtn press" id="keyBtn" aria-label="API key settings"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="15" r="4"/><path d="M11 12l9-9"/><path d="M17 6l3 3"/></svg></button>
+      </span>
+    </div>
+    <div id="keyPanel"></div>
+    <div class="msgs" id="msgs" aria-live="polite"></div>
+    <div class="composer">
+      <form id="chatForm">
+        <label for="chatInput" class="sr">Message</label>
+        <textarea id="chatInput" rows="1" placeholder="Ask anything about your trip…" enterkeyhint="send"></textarea>
+        <button class="send press" id="sendBtn" type="submit" aria-label="Send" disabled><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5"/><path d="M6 11l6-6 6 6"/></svg></button>
+      </form>
+    </div>
+  </section>
+
+  <div class="toaster" id="toaster" aria-live="polite"></div>
+  <nav class="tabbar" aria-label="Sections" id="tabbar">
+    <span class="tab-ind" id="tabInd" aria-hidden="true"></span>
+    <button class="tab" data-v="trip" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="4.5" r="2"/><circle cx="12" cy="19.5" r="2"/><circle cx="12" cy="12" r="2.6"/><path d="M12 6.5v2.9M12 14.6v2.9"/></svg>Trip</button>
+    <button class="tab" data-v="flights"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 16l20-6-3-2-6 1.5L7 4H5l3 6.5-4 1L2.5 10H1l1 6z"/><path d="M3 21h18"/></svg>Flights</button>
+    <button class="tab" data-v="schools"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9l9-5 9 5-9 5-9-5z"/><path d="M7 11.5V16c0 1.5 2.2 3 5 3s5-1.5 5-3v-4.5"/></svg>Schools</button>
+    <button class="tab" data-v="prep"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="8"/><path d="M8.5 12l2.5 2.5 4.5-5"/></svg>Prep</button>
+    <button class="tab" data-v="ask"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1.1-4.6A8 8 0 1 1 21 12z"/><path d="M8.5 11h.01M12 11h.01M15.5 11h.01"/></svg>Ask</button>
+  </nav>
+</div>
+
+<script>
+(function(){
+'use strict';
+const MODEL = 'claude-sonnet-5-5';
+const KIND = { flight:'#0B4A63', travel:'#2F7A5B', free:'#8A99A3', todo:'#B7791F', cal:'#6B5BA8', 'school-mac':'#7A003C', 'school-tmu':'#004C9B', 'school-otu':'#E75D2A' };
+const TAG = { 'Booked':['#DDF0E6','#1C5E3F'], 'Calendar':['#E7E3F5','#4A3D86'], 'Clash':['#FBE1DD','#8F1D10'], 'Option':['#E1E7EA','#33434D'] };
+const TAG_TODO = ['#FCEBC9','#6E4300'];
+
+const STOPS = [
+  { name:'Dundas', sub:'Base', x:.04 },
+  { name:'Hamilton', sub:'McMaster', x:.29 },
+  { name:'Pearson', sub:'YYZ', x:.49 },
+  { name:'Toronto', sub:'TMU', x:.68 },
+  { name:'Oshawa', sub:'Ontario Tech', x:.96 }
+];
+
+const DAYS = [
+  { dow:'Fri', d:23, mon:'Oct', stop:2, name:'Travel day', sub:'BCN → IAD → YYZ', where:'Ends at Pearson, then on to Dundas',
+    note:['info','Fly on your Canadian passport. It covers the US connection (no ESTA needed) and getting back into Canada.'],
+    items:[
+      { t:'TBC', title:'Check in at Barcelona El Prat', body:'Be there 3 h before an international departure. Drop your bag, then go through passport control.', kind:'travel' },
+      { t:'TBC', title:'Flight 1 · BCN → IAD', body:'Flight number, seat and times from your booking go here.', kind:'flight', tag:'Add details' },
+      { t:'TBC', title:'Connect at Washington Dulles', body:'US customs at your first stop: collect your checked bag, drop it again, then security again. Step by step on the Flights tab.', kind:'flight' },
+      { t:'TBC', title:'Flight 2 · IAD → YYZ', body:'A short hop, about 1 h 30 m in the air.', kind:'flight', tag:'Add details' },
+      { t:'TBC', title:'Land at Toronto Pearson', body:'Canadian border (eGate or kiosk), then baggage.', kind:'travel' },
+      { t:'TBC', title:'Pearson → Dundas', body:'About 45–60 min by car via the QEW and 403. Who’s picking you up?', kind:'travel', tag:'Plan' }
+    ] },
+  { dow:'Sat', d:24, mon:'Oct', stop:0, name:'Land softly', sub:'Jet-lag day', where:'Dundas · home base',
+    note:['info','Toronto is 6 h behind Barcelona today. Get outside in daylight and hold out for a normal bedtime.'],
+    items:[
+      { t:'Morning', title:'Sleep in, then a proper breakfast', body:'Your body will think it’s mid-afternoon.', kind:'free' },
+      { t:'Midday', title:'Sort out your phone', body:'Get a Canadian eSIM or a roaming plan so maps and texts work on tour days.', kind:'todo' },
+      { t:'Afternoon', title:'Dundas Peak & Webster’s Falls', body:'Peak fall colour. Weekend entry to Spencer Gorge needs a Hamilton Conservation reservation, so book before you go.', kind:'free', tag:'Reserve' },
+      { t:'Evening', title:'Early night', body:'', kind:'free' }
+    ] },
+  { dow:'Sun', d:25, mon:'Oct', stop:0, name:'Europe’s clocks change', sub:'Spain falls back overnight', where:'Dundas',
+    note:['info','From today until Nov 1, Barcelona is only 5 h ahead of Ontario. Calls with home shift by an hour.'],
+    items:[
+      { t:'9:00 AM', title:'George for Evan', body:'From your calendar · 2:00 PM in Barcelona.', kind:'cal', tag:'Calendar' },
+      { t:'Afternoon', title:'Book the Ontario Tech visit', body:'Aim for Fri Oct 30. That puts Toronto, Hamilton and Oshawa on back-to-back days.', kind:'todo', tag:'To book' },
+      { t:'Evening', title:'Write your tour questions', body:'Five you’ll ask at every school. There’s a starter list on the Prep tab.', kind:'todo' }
+    ] },
+  { dow:'Mon', d:26, mon:'Oct', stop:0, name:'Open day', sub:'Buffer or backup visit', where:'Dundas',
+    items:[
+      { t:'Any time', title:'Backup date for Ontario Tech', body:'If Fri Oct 30 is full, today works. Allow about 1 h 45 m each way.', kind:'school-otu', tag:'Option' },
+      { t:'Afternoon', title:'Plan Wednesday’s trip into Toronto', body:'Drive (about 1–1.5 h), or take a GO train from Aldershot to Union and walk 20 min to TMU.', kind:'travel' }
+    ] },
+  { dow:'Tue', d:27, mon:'Oct', stop:0, name:'Quiet day', sub:'Rest and scout Hamilton', where:'Dundas · Hamilton',
+    items:[
+      { t:'7:00 AM', title:'Lisa for Evan', body:'From your calendar · 12:00 PM in Barcelona.', kind:'cal', tag:'Calendar' },
+      { t:'Afternoon', title:'Scout McMaster', body:'Find Lot I and the John Hodgins Engineering building now, so Thursday is easy.', kind:'school-mac' }
+    ] },
+  { dow:'Wed', d:28, mon:'Oct', stop:3, name:'TMU', sub:'Campus tour', where:'350 Victoria St, Toronto',
+    note:['warn','Clash: “George for Evan” is also at 2:00 PM ET today. Take the 10:00 AM tour or move George.'],
+    items:[
+      { t:'11:30 AM', title:'Leave Dundas', body:'Drive, or take a GO train from Aldershot. Parking downtown is expensive, so the train is easier.', kind:'travel' },
+      { t:'12:45 PM', title:'Lunch near Yonge–Dundas', body:'TMU is right off Yonge and Gould.', kind:'free' },
+      { t:'2:00 PM', title:'TMU campus tour', body:'Slots on the 28th: 10:00 AM or 2:00 PM, and you haven’t booked yet. The meeting point will be in the confirmation email.', kind:'school-tmu', tag:'To book' },
+      { t:'2:00 PM', title:'George for Evan', body:'From your calendar · clashes with the tour.', kind:'cal', tag:'Clash' },
+      { t:'Late PM', title:'Back to Dundas', body:'Leave before 4 PM or after 7 PM to dodge rush hour.', kind:'travel' }
+    ] },
+  { dow:'Thu', d:29, mon:'Oct', stop:1, name:'McMaster', sub:'Mac Eng tour · you + 1 guest', where:'JHE A214 · 1280 Main St W, Hamilton',
+    items:[
+      { t:'12:50 PM', title:'Leave Dundas', body:'About 10–15 min to campus.', kind:'travel' },
+      { t:'1:05 PM', title:'Park in Lot I', body:'If it’s full, use visitor lots B, C, E, G, H or Q, then follow Maps to JHE.', kind:'travel' },
+      { t:'1:20 PM', title:'At JHE A214, 10 min early', body:'Go into John Hodgins Engineering and follow the maroon signs to the 2nd floor.', kind:'school-mac' },
+      { t:'1:30 PM', title:'Mac Eng tour · 75 min', body:'Student guides, labs, classrooms and student spaces. Engineering only, no residences.', kind:'school-mac', tag:'Booked' },
+      { t:'2:45 PM', title:'Walk the campus, then debrief', body:'Score McMaster on the Prep tab while it’s fresh.', kind:'todo' }
+    ] },
+  { dow:'Fri', d:30, mon:'Oct', stop:4, name:'Ontario Tech', sub:'Proposed · not booked', where:'2000 Simcoe St N, Oshawa',
+    note:['warn','Placeholder until you book: date and tour time still to confirm.'],
+    items:[
+      { t:'8:00 AM', title:'Leave Dundas', body:'About 1 h 45 m via the 403 and 407 ETR (toll), or the 401 (free but slower).', kind:'travel' },
+      { t:'TBC', title:'Ontario Tech campus tour', body:'North Oshawa campus · Engineering and Applied Science.', kind:'school-otu', tag:'To book' },
+      { t:'Afternoon', title:'Lunch in Oshawa, drive back', body:'Leave before 3 PM to beat the 401 rush.', kind:'travel' }
+    ] },
+  { dow:'Sat', d:31, mon:'Oct', stop:0, name:'Halloween', sub:'Pack, compare, check in', where:'Dundas',
+    items:[
+      { t:'Morning', title:'Rank the three schools', body:'Use the scores from each visit before the details blur together.', kind:'todo' },
+      { t:'TBC', title:'Online check-in opens', body:'24 h before the flight home. Pick your seat.', kind:'flight', tag:'Do it' },
+      { t:'Evening', title:'Pack, then Halloween night', body:'', kind:'free' }
+    ] },
+  { dow:'Sun', d:1, mon:'Nov', stop:3, name:'Fly home', sub:'YTZ → IAD → BCN', where:'Billy Bishop Toronto City Airport (YTZ)',
+    note:['warn','You’re leaving from Toronto Island, not Pearson. Also, Ontario clocks fall back at 2:00 AM, so check any alarm that doesn’t update itself.'],
+    items:[
+      { t:'8:00 AM', title:'George for Evan', body:'From your calendar · 2:00 PM in Barcelona (back to a 6 h gap).', kind:'cal', tag:'Calendar' },
+      { t:'TBC', title:'Dundas → Billy Bishop', body:'About 1 h by car to the foot of Bathurst St. Then a pedestrian tunnel (about 6 min) or the short ferry to the island. Be there 2 h before departure.', kind:'travel' },
+      { t:'TBC', title:'Flight 1 · YTZ → IAD', body:'Flight number, seat and times go here.', kind:'flight', tag:'Add details' },
+      { t:'TBC', title:'Connect at Washington Dulles', body:'You’re entering the US again, so expect customs and a bag recheck again. Leave 2 h or more.', kind:'flight' },
+      { t:'TBC', title:'Flight 2 · IAD → BCN', body:'Overnight. You land in Barcelona on Mon Nov 2.', kind:'flight', tag:'Add details' }
+    ] }
+];
+
+const LEGS = [
+  { label:'Out · Fri Oct 23 · leg 1', from:'BCN', fromCity:'Barcelona', to:'IAD', toCity:'Washington Dulles', accent:'#0B4A63' },
+  { label:'Out · Fri Oct 23 · leg 2', from:'IAD', fromCity:'Washington Dulles', to:'YYZ', toCity:'Toronto Pearson', accent:'#0B4A63' },
+  { label:'Home · Sun Nov 1 · leg 1', from:'YTZ', fromCity:'Toronto Island', to:'IAD', toCity:'Washington Dulles', accent:'#2F7A5B' },
+  { label:'Home · Sun Nov 1 · leg 2', from:'IAD', fromCity:'Washington Dulles', to:'BCN', toCity:'Barcelona', accent:'#2F7A5B' }
+];
+
+const STEPS = [
+  { title:'US customs (CBP)', body:'Follow signs for international arrivals and connections. On a Canadian passport you need no ESTA or visa. The Mobile Passport Control app can shorten the line, and Canadians can use it.' },
+  { title:'Collect your checked bag', body:'Pick it up at baggage claim, even if it was tagged through to the final destination. That’s how US first-entry rules work.' },
+  { title:'Drop it again for your next flight', body:'The connecting bag drop is just past customs. Then follow the signs for connecting flights.' },
+  { title:'TSA security again', body:'A full screening. Liquids still go in 100 ml containers, so pack your carry-on with that in mind.' },
+  { title:'Find your gate', body:'Dulles concourses are linked by the AeroTrain. Check your gate on the screens before you board it.' }
+];
+
+const SCHOOLS = [
+  { key:'tmu', name:'Toronto Metropolitan University', short:'TMU', when:'Wed Oct 28 · 2:00 PM ET', city:'Toronto', drive:'1–1.5 h',
+    status:'Not booked', chipBg:'#FFDC00', chipFg:'#1F1A00', color:'#004C9B', soft:'#D6E4F5',
+    rows:[
+      ['Where','350 Victoria St, Toronto · off Yonge and Gould'],
+      ['Tour slots on the 28th','10:00 AM or 2:00 PM. You picked 2:00 PM, but the booking form isn’t submitted yet.'],
+      ['Getting there','GO train from Aldershot to Union (about 1 h), then a 20-min walk or TTC Line 1 to Dundas station. Or drive, though downtown parking is expensive.'],
+      ['Meeting point','It’ll be in your confirmation email.']
+    ],
+    warn:'You also have “George for Evan” at 2:00 PM ET that day. Book the 10:00 AM slot or move George.' },
+  { key:'mac', name:'McMaster University', short:'McMaster', when:'Thu Oct 29 · 1:30–2:45 PM ET', city:'Hamilton', drive:'10–15 min',
+    status:'Booked', chipBg:'#FFFFFF', chipFg:'#7A003C', color:'#7A003C', soft:'#F1D6E2',
+    rows:[
+      ['Meet','JHE A214, in the John Hodgins Engineering building. Follow the maroon signs to the 2nd floor.'],
+      ['Arrive','1:20 PM, 10 min early, so the tour can start on time.'],
+      ['Parking','Lot I is the closest. If it’s full, try visitor lots B, C, E, G, H or Q.'],
+      ['Your booking','Mac Eng tour, 75 min, you + 1 guest. Program on the form: Bachelor of Technology. Engineering spaces only, no residences.'],
+      ['Changes','You can cancel or reschedule up to one day before. The links are in the Calendly email.']
+    ] },
+  { key:'otu', name:'Ontario Tech University', short:'Ontario Tech', when:'Fri Oct 30 · time TBC', city:'Oshawa', drive:'~1 h 45 m',
+    status:'Not booked', chipBg:'#E75D2A', chipFg:'#FFFFFF', color:'#003C71', soft:'#D3E0EE',
+    rows:[
+      ['Where','North Oshawa campus · 2000 Simcoe St N'],
+      ['Faculty','Engineering and Applied Science'],
+      ['Getting there','The 403 then the 407 ETR (toll, fastest), or the 401 (free, heavy traffic). Leave by 8 AM.'],
+      ['Backup date','Mon Oct 26 is free if Friday is full.']
+    ],
+    warn:'Date and tour time still to confirm.' }
+];
+
+const GROUPS = [
+  { title:'Book and confirm', items:[
+    ['tmu','Book the TMU tour','The 10:00 AM slot avoids your 2:00 PM clash with George.'],
+    ['otu','Book the Ontario Tech tour','Aim for Fri Oct 30. Mon Oct 26 is the backup.'],
+    ['mac','McMaster tour, Thu 1:30 PM','Booked for you + 1 guest.', true],
+    ['fl','Add flight numbers and booking refs','Four flights: BCN–IAD–YYZ out, YTZ–IAD–BCN home.'],
+    ['ride','Sort out a ride from Pearson on Oct 23',''],
+    ['geo','Move George on Oct 28','Only if you keep the 2:00 PM TMU slot.']
+  ] },
+  { title:'Documents', items:[
+    ['pp','Canadian passport, valid through the trip','Fly on it both ways. No ESTA needed for the Dulles connections.'],
+    ['bp','Boarding passes in your phone wallet',''],
+    ['conf','Tour confirmations saved offline','In case campus Wi-Fi is patchy.']
+  ] },
+  { title:'Pack', items:[
+    ['warm','Warm layers and a rain shell','Late October in Ontario is cool and often wet.'],
+    ['shoes','Comfortable walking shoes','Each tour is about 75 min on foot.'],
+    ['plug','Plug adapter for type A/B outlets','Canada uses 120 V. Most phone and laptop chargers handle it.'],
+    ['liq','Liquids in 100 ml bottles','You go through security at Dulles on both legs.']
+  ] },
+  { title:'On the ground', items:[
+    ['sim','Canadian eSIM or roaming plan',''],
+    ['card','A card with no foreign-transaction fees',''],
+    ['clock','Clocks: Spain changes Oct 25, Ontario Nov 1','Recheck call times with home.']
+  ] }
+];
+const CRIT = ['Program fit','Campus feel','Co-op and jobs','Location'];
+const QUESTIONS = [
+  'Is first year common engineering, or do I pick my discipline on day one?',
+  'How does co-op work: when does it start, and how do students land placements?',
+  'How big are first-year classes, and who teaches them?',
+  'Which design teams or clubs (robotics, rocketry, Formula) can first-years join?',
+  'What do students wish they’d known before choosing this school?'
+];
+
+
+/* ============ helpers ============ */
+const store = {
+  get(k, d){ try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch(e){ return d; } },
+  set(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} },
+  del(k){ try { localStorage.removeItem(k); } catch(e){} }
+};
+const K_PREP = 'lakeshore.prep.v1', K_KEY = 'lakeshore.apikey', K_CHAT = 'lakeshore.chat.v1';
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const $ = id => document.getElementById(id);
+const reduce = (() => { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch(e){ return false; } })();
+const EASE = 'cubic-bezier(.23,1,.32,1)';
+
+const LETTER = { 'school-mac':'M', 'school-tmu':'T', 'school-otu':'O' };
+const LINEC = { 'school-mac':'var(--mac)', 'school-tmu':'var(--tmu)', 'school-otu':'var(--otu)' };
+const SKEY = { mac:'school-mac', tmu:'school-tmu', otu:'school-otu' };
+const DOTC = { flight:'var(--air)', travel:'var(--road)', free:'#9AA5AB', todo:'var(--todo)', cal:'var(--cal)', 'school-mac':'var(--mac)', 'school-tmu':'var(--tmu)', 'school-otu':'var(--otu)' };
+const TAGC = { 'Booked':['var(--ok-bg)','var(--ok-fg)'], 'Calendar':['#ECE8F8','#46388A'], 'Clash':['var(--bad-bg)','var(--bad-fg)'], 'Option':['#E6EAEC','#36424C'] };
+const tagStyle = t => { const c = TAGC[t] || ['var(--warn-bg)','var(--warn-fg)']; return `background:${c[0]};color:${c[1]}`; };
+const ICON = {
+  chev:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>',
+  pin:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>',
+  info:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5"/><path d="M12 16.5v.01"/></svg>',
+  plane:'<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--air)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.8 19.2L16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg>',
+  check:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>'
+};
+
+/* ============ motion helpers ============ */
+function reveal(el){
+  if (!el || reduce || el.dataset.revealed) return;
+  el.dataset.revealed = '1';
+  const text = el.textContent; el.setAttribute('aria-label', text);
+  let i = 0;
+  el.innerHTML = text.split(' ').map(w => `<span class="w" aria-hidden="true">${[...w].map(c => `<span style="--i:${i++}">${esc(c)}</span>`).join('')}</span>`).join(' ');
+}
+function stagger(els, o){
+  if (reduce) return;
+  o = Object.assign({ y:14, step:45, max:8, dur:520, delay:0 }, o || {});
+  Array.from(els).slice(0, o.max).forEach((el, k) => el.animate(
+    [{ opacity:0, transform:`translateY(${o.y}px)` }, { opacity:1, transform:'none' }],
+    { duration:o.dur, delay:o.delay + k * o.step, easing:EASE, fill:'backwards' }));
+}
+document.querySelectorAll('.scroll').forEach(sc => {
+  const top = sc.querySelector('.top');
+  if (top) sc.addEventListener('scroll', () => top.classList.toggle('edge', sc.scrollTop > 4), { passive:true });
+});
+
+/* ============ TRIP: the line ============ */
+const N = DAYS.length;
+const start = Date.UTC(2026, 9, 23, 4);
+const todayIdx = Math.floor((Date.now() - start) / 86400000);
+const focusIdx = Math.max(0, Math.min(N - 1, todayIdx));
+
+(function headline(){
+  const dep = Date.UTC(2026, 9, 23, 6);
+  const daysTo = Math.ceil((dep - Date.now()) / 86400000);
+  $('headline').textContent = daysTo > 1 ? daysTo + ' days to takeoff' : daysTo === 1 ? 'Takeoff tomorrow' : (todayIdx < N ? 'Day ' + (todayIdx + 1) + ' of ' + N : 'Welcome home');
+})();
+
+$('lines').innerHTML = SCHOOLS.map(s => {
+  const i = DAYS.findIndex(d => d.items.some(it => it.kind === SKEY[s.key] && (it.tag === 'Booked' || it.tag === 'To book')));
+  const d = DAYS[i];
+  return `<button class="line-chip press" data-day="${i}"><span class="bullet" style="--c:${LINEC[SKEY[s.key]]}">${LETTER[SKEY[s.key]]}</span><span class="lt"><b>${esc(s.short)}</b><span>${d.dow} ${d.mon} ${d.d}</span></span></button>`;
+}).join('');
+
+function stationHTML(d, i){
+  const school = d.items.find(it => it.kind.startsWith('school') && (it.tag === 'Booked' || it.tag === 'To book'));
+  const past = todayIdx >= 0 && i < todayIdx, here = i === todayIdx;
+  const mark = school
+    ? `<span class="bullet" style="--c:${LINEC[school.kind]}">${LETTER[school.kind]}</span>`
+    : `<span class="dotm"></span>`;
+  const place = STOPS[d.stop] ? STOPS[d.stop].name : '';
+  let chips = '';
+  if (school) chips += `<span class="tag time mono">${esc(school.t)}</span><span class="tag" style="${tagStyle(school.tag)}">${esc(school.tag === 'To book' ? 'Not booked' : school.tag)}</span>`;
+  if (d.items.some(it => it.kind === 'flight' && /→/.test(it.title))) chips += `<span class="tag time">${d.items.filter(it => it.kind === 'flight' && /Flight/.test(it.title)).length} flights</span>`;
+  if (d.items.some(it => it.tag === 'Clash')) chips += `<span class="tag" style="${tagStyle('Clash')}">Clash</span>`;
+  if (here) chips = `<span class="here-tag">You are here</span>` + chips;
+  else if (todayIdx < 0 && i === 0) chips = `<span class="here-tag">Next</span>` + chips;
+  const note = d.note ? `<div class="note ${d.note[0]}" role="note">${ICON.info}<span>${esc(d.note[1])}</span></div>` : '';
+  const stops = d.items.map(it => `<li><span class="k" style="background:${DOTC[it.kind]}" aria-hidden="true"></span><div><span class="t mono">${esc(it.t)}</span><div class="row"><h3>${esc(it.title)}</h3>${it.tag ? `<span class="tag" style="${tagStyle(it.tag)}">${esc(it.tag)}</span>` : ''}</div>${it.body ? `<p>${esc(it.body)}</p>` : ''}</div></li>`).join('');
+  const titleColor = school ? LINEC[school.kind] : 'var(--ink)';
+  return `<li class="stn ${past ? 'past' : ''} ${here ? 'here' : ''}" data-i="${i}">
+    <div class="date" aria-hidden="true"><b>${d.d}</b><span>${d.dow}</span><em class="sign">${esc(place)}</em></div>
+    <div class="mark" aria-hidden="true"><span class="plat"></span>${mark}</div>
+    <button class="press" aria-expanded="false" aria-controls="d${i}"><span class="sr">${d.dow} ${d.mon} ${d.d}: </span><h2 style="color:${titleColor}">${esc(d.name)}${ICON.chev}</h2><span class="sub">${esc(d.sub)}</span>${chips ? `<span class="chips">${chips}</span>` : ''}</button>
+    <div class="grow" id="d${i}"><div><div class="detail"><div class="where">${ICON.pin}<span>${esc(d.where)}</span></div>${note}<ol class="stops">${stops}</ol></div></div></div>
+  </li>`;
+}
+const route = $('route');
+route.insertAdjacentHTML('beforeend', DAYS.map(stationHTML).join(''));
+const stations = Array.from(route.querySelectorAll('.stn'));
+
+function setOpen(i, open){
+  const li = stations[i]; if (!li) return;
+  li.classList.toggle('open', open);
+  li.querySelector('button').setAttribute('aria-expanded', String(open));
+  if (open) stagger(li.querySelectorAll('.stops li'), { delay:120, step:45, y:8, max:7, dur:420 });
+}
+route.addEventListener('click', e => {
+  const b = e.target.closest('.stn > button'); if (!b) return;
+  const i = +b.parentElement.dataset.i;
+  setOpen(i, !stations[i].classList.contains('open'));
+});
+$('lines').addEventListener('click', e => {
+  const b = e.target.closest('.line-chip'); if (!b) return;
+  const i = +b.dataset.day;
+  setOpen(i, true);
+  const sc = $('tripScroll');
+  const y = stations[i].getBoundingClientRect().top - sc.getBoundingClientRect().top + sc.scrollTop - 70;
+  sc.scrollTo({ top:y, behavior: reduce ? 'auto' : 'smooth' });
+  if (!reduce) stations[i].querySelector('.mark').animate([{ transform:'scale(1)' }, { transform:'scale(1.35)' }, { transform:'scale(1)' }], { duration:700, delay:350, easing:EASE });
+});
+
+/* track geometry + the train */
+const trackEl = $('track'), lit = $('lit'), train = $('train'), puffs = $('puffs'), tripScroll = $('tripScroll');
+let railTop = 0, railH = 1, stY = [];
+const OFF = 56; // the train pulls up just below each station so the roundel stays visible
+function measureRail(){
+  const r0 = route.getBoundingClientRect().top;
+  stY = stations.map(st => st.querySelector('.mark').getBoundingClientRect().top - r0 + 22);
+  railTop = stY[0] - 30;
+  railH = Math.max(1, stY[N - 1] + OFF + 56 - railTop);
+  trackEl.style.top = railTop + 'px';
+  trackEl.style.height = railH + 'px';
+  buildScenery();
+  kick();
+}
+/* trackside scenery: autumn maples, bushes, lamps, and a signal before every station */
+const scenery = $('scenery');
+let signals = [];
+function rng(seed){ return () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; }; }
+function buildScenery(){
+  const tx = trackEl.offsetLeft + 15;           // centre line of the track in route coordinates
+  const rand = rng(20261023);
+  const FALL = ['#D9632B','#C2412D','#E8A23A','#B5532A','#E3B341','#8E9B3A'];
+  let html = '';
+  signals = [];
+  const near = y => stY.some(sy => Math.abs(y - sy) < 26 || Math.abs(y - (sy + OFF)) < 2 && false);
+  for (let y = railTop + 14; y < railTop + railH - 10; y += 19){
+    for (const side of [-1, 1]){
+      if (near(y)) continue;
+      const r = rand();
+      const x = tx + side * (side < 0 ? 22 + rand() * 3 : 21 + rand() * 1.5);
+      if (r < 0.5){
+        const sz = side < 0 ? 10 + Math.round(rand() * 4) : 9 + Math.round(rand() * 2);
+        html += `<span class="tree ${rand() < .35 ? 'c2' : ''}" style="left:${x.toFixed(1)}px;top:${(y + rand() * 8).toFixed(1)}px;--sz:${sz}px;--c:${FALL[Math.floor(rand() * FALL.length)]}"></span>`;
+      } else if (r < 0.68){
+        html += `<span class="bush" style="left:${(x - side * 2).toFixed(1)}px;top:${(y + rand() * 10).toFixed(1)}px"></span>`;
+      } else if (r < 0.74){
+        html += `<span class="lamp" style="left:${(tx + side * 21).toFixed(1)}px;top:${y.toFixed(1)}px"></span>`;
+      }
+    }
+  }
+  stY.forEach((sy, i) => {
+    if (i === 0) return;
+    const y = sy - 36;
+    signals.push(y);
+    html += `<span class="signal red" data-y="${y}" style="left:${(tx + 21).toFixed(1)}px;top:${y.toFixed(1)}px"></span>`;
+  });
+  scenery.innerHTML = html;
+  signalEls = Array.from(scenery.querySelectorAll('.signal'));
+}
+let signalEls = [];
+
+/* where the train should be: follows a line 42% down the screen, and dwells at stations */
+function targetY(){
+  const routeTop = route.getBoundingClientRect().top - tripScroll.getBoundingClientRect().top + tripScroll.scrollTop;
+  let t = tripScroll.scrollTop + tripScroll.clientHeight * 0.42 - routeTop;
+  const maxScroll = tripScroll.scrollHeight - tripScroll.clientHeight;
+  const remaining = maxScroll - tripScroll.scrollTop, blend = tripScroll.clientHeight * 0.35;
+  if (remaining < blend) t += (stY[N - 1] + OFF - t) * (1 - Math.max(0, remaining) / blend);   // ease into the terminus
+  t = Math.max(stY[0] + OFF, Math.min(stY[N - 1] + OFF, t));
+  let best = 0; for (let i = 1; i < N; i++) if (Math.abs(stY[i] + OFF - t) < Math.abs(stY[best] + OFF - t)) best = i;
+  const d = t - (stY[best] + OFF), zone = 70;
+  if (Math.abs(d) < zone) t = stY[best] + OFF + d * Math.pow(Math.abs(d) / zone, 2);   // slow into the platform
+  return t;
+}
+let ty = null, tv = 0, tLast = 0, running = false, lastPuff = 0, arrivedAt = -1;
+function render(){
+  train.style.transform = `translate3d(0,${(ty - 40).toFixed(2)}px,0)`;
+  lit.style.height = Math.max(0, ty - railTop).toFixed(1) + 'px';
+  const moving = Math.abs(tv) > 25;
+  train.classList.toggle('moving', moving);
+  if (Math.abs(tv) > 60) train.classList.toggle('up', tv < 0);
+  for (let i = 0; i < signalEls.length; i++){
+    const passed = ty - 40 > signals[i];          // the whole train is past the signal
+    signalEls[i].classList.toggle('green', passed);
+    signalEls[i].classList.toggle('red', !passed);
+  }
+  let arr = -1; for (let i = 0; i < N; i++) if (Math.abs(stY[i] + OFF - ty) < 8 && Math.abs(tv) < 60) arr = i;
+  if (arr !== arrivedAt){
+    if (arrivedAt >= 0) stations[arrivedAt].classList.remove('arrived');
+    if (arr >= 0) stations[arr].classList.add('arrived');
+    arrivedAt = arr;
+  }
+}
+let lastIdle = 0, lastLeaf = 0;
+function puff(now){
+  if (reduce || puffs.childElementCount > 34) return;
+  const speed = Math.abs(tv), moving = speed > 30;
+  if (moving ? now - lastPuff < Math.max(45, 110 - speed * 0.08) : now - lastIdle < 650) return;
+  if (moving) lastPuff = now; else lastIdle = now;
+  const up = train.classList.contains('up');
+  const chimneyY = ty + (up ? -5 : 5);              // chimney sits just behind the cab
+  const back = up ? 1 : -1;                          // smoke trails behind the direction of travel
+  const el = document.createElement('span');
+  el.className = 'puff' + (Math.random() < 0.35 ? ' dark' : '');
+  el.style.left = `calc(var(--tx) + ${(Math.random() * 4 - 2).toFixed(1)}px)`;
+  el.style.top = chimneyY + 'px';
+  const drift = moving ? 40 + Math.min(70, speed * 0.12) : 26;
+  el.style.setProperty('--dx', (12 + Math.random() * 26 * (Math.random() < .3 ? -1 : 1)).toFixed(0) + 'px');   // a light breeze off the lake
+  el.style.setProperty('--dy', (back * (drift + Math.random() * 30)).toFixed(0) + 'px');
+  el.style.setProperty('--s', (moving ? 2.6 + Math.random() * 1.2 : 1.8 + Math.random() * .6).toFixed(2));
+  el.style.setProperty('--life', (moving ? 1500 + Math.random() * 500 : 1900).toFixed(0) + 'ms');
+  puffs.appendChild(el);
+  el.addEventListener('animationend', () => el.remove());
+  // leaves whipped up off the track
+  if (moving && speed > 120 && now - lastLeaf > 160 && puffs.childElementCount < 34){
+    lastLeaf = now;
+    const lf = document.createElement('span');
+    const side = Math.random() < .5 ? -1 : 1;
+    lf.className = 'leaf';
+    lf.style.left = `calc(var(--tx) + ${side * 10}px)`;
+    lf.style.top = (ty + (up ? -30 : 30)) + 'px';
+    lf.style.setProperty('--c', ['#D9632B','#C2412D','#E8A23A','#E3B341'][Math.floor(Math.random() * 4)]);
+    lf.style.setProperty('--dx', (side * (24 + Math.random() * 30)).toFixed(0) + 'px');
+    lf.style.setProperty('--dy', (back * (10 + Math.random() * 40)).toFixed(0) + 'px');
+    lf.style.setProperty('--r', ((Math.random() < .5 ? -1 : 1) * (180 + Math.random() * 360)).toFixed(0) + 'deg');
+    puffs.appendChild(lf);
+    lf.addEventListener('animationend', () => lf.remove());
+  }
+}
+/* gentle idle smoke while parked at a station */
+setInterval(() => { if (!running && !reduce && $('v-trip').classList.contains('on') && ty !== null) puff(performance.now()); }, 700);
+function step(now){
+  const dt = Math.min(0.034, (now - (tLast || now)) / 1000 || 0.016); tLast = now;
+  const target = targetY();
+  if (reduce){ ty = target; tv = 0; render(); running = false; return; }
+  const k = 150, c = 2 * Math.sqrt(k) * 0.92;                 // spring: response ~0.5s, a touch of overshoot on arrival
+  tv += ((target - ty) * k - c * tv) * dt;
+  ty += tv * dt;
+  render(); puff(now);
+  if (Math.abs(target - ty) < 0.3 && Math.abs(tv) < 2){ ty = target; tv = 0; render(); running = false; tLast = 0; return; }
+  requestAnimationFrame(step);
+}
+function kick(){
+  if (!stY.length) return;
+  if (ty === null) ty = stY[0] - 150;          // the train rolls in from up the line on load
+  if (!running){ running = true; tLast = 0; requestAnimationFrame(step); }
+}
+const drawInk = kick;
+tripScroll.addEventListener('scroll', kick, { passive:true });
+try { new ResizeObserver(measureRail).observe(route); } catch(e){ window.addEventListener('resize', measureRail); }
+
+/* stations pop as the line reaches them */
+if (!reduce && 'IntersectionObserver' in window){
+  const io = new IntersectionObserver(ents => ents.forEach(en => {
+    if (!en.isIntersecting) return;
+    io.unobserve(en.target);
+    en.target.animate([{ transform:'scale(.4)', opacity:0 }, { transform:'scale(1)', opacity:1 }], { duration:520, easing:'cubic-bezier(.34,1.56,.64,1)', fill:'backwards' });
+  }), { root:tripScroll, rootMargin:'0px 0px -12% 0px' });
+  stations.forEach(s => io.observe(s.querySelector('.mark')));
+}
+
+/* ============ FLIGHTS: journeys ============ */
+function legHTML(leg){
+  return `<li class="leg">${ICON.plane}<dl><div><dt>Flight</dt><dd class="mono">[—]</dd></div><div><dt>Departs</dt><dd class="mono">[—]</dd></div><div><dt>Arrives</dt><dd class="mono">[—]</dd></div></dl></li>`;
+}
+function apHTML(code, city, sub, change, id){
+  const stepsList = `<ol class="steps">${STEPS.map(s => `<li><div><b>${esc(s.title)}</b><span>${esc(s.body)}</span></div></li>`).join('')}</ol>`;
+  return `<li class="ap ${change ? 'change' : ''}"><span class="m" aria-hidden="true"></span><div><span class="code mono">${code}</span><span class="city">${esc(city)}${sub ? ' · ' + esc(sub) : ''}</span></div>${change ? '' : ''}
+    ${change ? `<button class="change-btn press" aria-expanded="false" aria-controls="${id}"><span>Change here: customs and bag recheck</span>${ICON.chev}</button><div class="grow" id="${id}"><div>${stepsList}</div></div>` : ''}</li>`;
+}
+$('journeys').innerHTML = [
+  { title:'Out · Fri Oct 23', stops:[['BCN','Barcelona','be there 3 h early'], 0, ['IAD','Washington Dulles','',true], 1, ['YYZ','Toronto Pearson','then 45–60 min to Dundas']] },
+  { title:'Home · Sun Nov 1', stops:[['YTZ','Toronto Island','tunnel or ferry from Bathurst St'], 2, ['IAD','Washington Dulles','',true], 3, ['BCN','Barcelona','lands Mon Nov 2']] }
+].map((j, ji) => `<article class="journey"><header><span>${j.title}</span><span class="tag" style="${tagStyle('Add details')}">Add flight details</span></header><ol class="jl">${j.stops.map(s => typeof s === 'number' ? legHTML(LEGS[s]) : apHTML(s[0], s[1], s[2], s[3], 'chg' + ji)).join('')}</ol></article>`).join('');
+$('journeys').addEventListener('click', e => {
+  const b = e.target.closest('.change-btn'); if (!b) return;
+  const ap = b.parentElement, open = !ap.classList.contains('open');
+  ap.classList.toggle('open', open); b.setAttribute('aria-expanded', String(open));
+  if (open) stagger(ap.querySelectorAll('.steps li'), { delay:100, step:50, y:8, dur:420 });
+});
+// the .grow rule keys off .open > .grow; journeys put grow inside .ap
+const apStyle = document.createElement('style'); apStyle.textContent = '.ap.open > .grow{grid-template-rows:1fr}'; document.head.appendChild(apStyle);
+
+/* ============ SCHOOLS: lines ============ */
+$('schools').innerHTML = SCHOOLS.map((s, i) => {
+  const k = SKEY[s.key];
+  const booked = s.status === 'Booked';
+  return `<article class="school ${i === 1 ? 'open' : ''}" style="--c:${LINEC[k]}">
+    <button class="press" aria-expanded="${i === 1}" aria-controls="s${i}"><span class="bullet lg">${LETTER[k]}</span><span><span class="nm">${esc(s.name)}</span><span class="wh">${esc(s.when)}</span></span><span class="chev">${ICON.chev}</span></button>
+    <div class="status"><span class="tag" style="${tagStyle(booked ? 'Booked' : 'To book')}">${booked ? 'Booked' : 'Not booked yet'}</span><span>${esc(s.city)} · ${esc(s.drive)} from Dundas</span></div>
+    <div class="grow" id="s${i}"><div><dl class="detail">${s.rows.map(r => `<div><dt>${esc(r[0])}</dt><dd>${esc(r[1])}</dd></div>`).join('')}${s.warn ? `<div style="border:0;padding:0"><div class="note warn" role="note">${ICON.info}<span>${esc(s.warn)}</span></div></div>` : ''}</dl></div></div>
+  </article>`;
+}).join('');
+const schoolStyle = document.createElement('style'); schoolStyle.textContent = '.school.open > .grow{grid-template-rows:1fr}'; document.head.appendChild(schoolStyle);
+$('schools').addEventListener('click', e => {
+  const b = e.target.closest('.school > button'); if (!b) return;
+  const card = b.parentElement, was = card.classList.contains('open');
+  $('schools').querySelectorAll('.school').forEach(c => { c.classList.remove('open'); c.firstElementChild.setAttribute('aria-expanded', 'false'); });
+  if (!was){ card.classList.add('open'); b.setAttribute('aria-expanded', 'true'); }
+});
+$('bookedCount').textContent = `${SCHOOLS.filter(s => s.status === 'Booked').length} of ${SCHOOLS.length} booked`;
+
+/* ============ PREP ============ */
+const prepDefault = { done:{}, scores:{} };
+GROUPS.forEach(gp => gp.items.forEach(it => { if (it[3]) prepDefault.done[it[0]] = true; }));
+const prep = store.get(K_PREP, prepDefault);
+prep.done = prep.done || {}; prep.scores = prep.scores || {};
+
+$('groups').innerHTML = GROUPS.map(gp => `<section class="sec"><h2>${esc(gp.title)}</h2><ul class="checks">${gp.items.map(it => `<li><button class="ck press" role="checkbox" data-k="${it[0]}" aria-checked="${!!prep.done[it[0]]}"><span class="box" aria-hidden="true">${ICON.check}</span><span style="min-width:0"><span class="tt">${esc(it[1])}</span>${it[2] ? `<span class="nt">${esc(it[2])}</span>` : ''}</span></button></li>`).join('')}</ul></section>`).join('');
+$('groups').querySelectorAll('.box path').forEach(p => p.setAttribute('stroke-dasharray', '24'));
+function counts(){ let total = 0, done = 0; GROUPS.forEach(gp => gp.items.forEach(it => { total++; if (prep.done[it[0]]) done++; })); return { total, done }; }
+function paintPrep(){
+  const { total, done } = counts(), p = done / total;
+  $('prepCount').textContent = `${done} of ${total} done`;
+  $('prepHead').textContent = done === total ? 'Ready to fly' : `${total - done} things left`;
+  delete $('prepHead').dataset.revealed;
+  $('progFill').style.transform = `scaleX(${p.toFixed(3)})`;
+  $('progTrain').style.left = (p * 100).toFixed(2) + '%';
+  $('progBar').setAttribute('aria-valuenow', done); $('progBar').setAttribute('aria-valuemax', total);
+}
+$('groups').addEventListener('click', e => {
+  const b = e.target.closest('.ck'); if (!b) return;
+  const k = b.dataset.k; prep.done[k] = !prep.done[k];
+  b.setAttribute('aria-checked', String(!!prep.done[k]));
+  if (navigator.vibrate && prep.done[k]) { try { navigator.vibrate(8); } catch(err){} }
+  store.set(K_PREP, prep); paintPrep();
+  if (prep.done[k]){ const c = counts(); toast(c.done === c.total ? 'All done. Ready to fly' : `Done · ${c.done} of ${c.total}`); }
+});
+function renderScores(){
+  $('scores').innerHTML = SCHOOLS.map(s => {
+    const k = SKEY[s.key]; let sum = 0;
+    const rows = CRIT.map((c, ci) => {
+      const key = s.key + ':' + ci, v = prep.scores[key] || 0; sum += v;
+      return `<div class="r"><span>${esc(c)}</span><span class="dots" role="radiogroup" aria-label="${esc(s.short)} · ${esc(c)}">${[1,2,3,4,5].map(n => `<button class="${n <= v ? 'on' : ''}" role="radio" aria-checked="${n === v}" aria-label="${n} of 5" data-k="${key}" data-n="${n}"><i></i></button>`).join('')}</span></div>`;
+    }).join('');
+    return `<div class="score" style="--c:${LINEC[k]}"><div class="h"><span class="bullet" style="--c:${LINEC[k]}">${LETTER[k]}</span><h3>${esc(s.short)}</h3><span class="sum mono">${sum}<span style="color:var(--ink-3)">/20</span></span></div>${rows}</div>`;
+  }).join('');
+}
+$('scores').addEventListener('click', e => {
+  const b = e.target.closest('[data-k]'); if (!b) return;
+  const k = b.dataset.k, n = +b.dataset.n;
+  prep.scores[k] = prep.scores[k] === n ? 0 : n; store.set(K_PREP, prep); renderScores();
+});
+$('questions').innerHTML = QUESTIONS.map((q, i) => `<li><span class="bullet sm" style="--c:var(--ink-3)" aria-hidden="true">${i + 1}</span><span>${esc(q)}</span></li>`).join('');
+
+/* stacking toasts */
+const toasts = [];
+function toast(text){
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.innerHTML = `<i aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#12171C" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></i><span>${esc(text)}</span>`;
+  $('toaster').appendChild(el); toasts.unshift(el);
+  while (toasts.length > 3){ toasts.pop().remove(); }
+  const restack = () => toasts.forEach((t, idx) => t.style.setProperty('--index', idx));
+  restack();
+  requestAnimationFrame(() => requestAnimationFrame(() => el.dataset.mounted = 'true'));
+  setTimeout(() => { el.dataset.leaving = 'true'; setTimeout(() => { const j = toasts.indexOf(el); if (j >= 0) toasts.splice(j, 1); el.remove(); restack(); }, 240); }, 2200);
+}
+
+/* ============ tabs: directional transitions + sliding indicator ============ */
+let current = 'trip';
+const ORDER = ['trip','flights','schools','prep','ask'];
+function moveTabInd(instant){
+  const t = document.querySelector(`.tab[data-v="${current}"]`), ind = $('tabInd'); if (!t) return;
+  if (instant) ind.style.transition = 'none';
+  ind.style.width = t.offsetWidth + 'px';
+  ind.style.transform = `translateX(${t.offsetLeft - 6}px)`;
+  if (instant) requestAnimationFrame(() => requestAnimationFrame(() => ind.style.transition = ''));
+}
+function enterEffects(v){
+  const root = $('v-' + v);
+  reveal(root.querySelector('h1'));
+  if (v === 'flights') stagger(root.querySelectorAll('.journey, .sec'), { delay:90, step:70 });
+  if (v === 'schools') stagger(root.querySelectorAll('.school'), { delay:90, step:70 });
+  if (v === 'prep') stagger(root.querySelectorAll('.sec'), { delay:90, step:60, max:6 });
+  if (v === 'ask') stagger(root.querySelectorAll('.msg, .sug, .keycard'), { delay:60, step:40, max:6 });
+  if (v === 'trip') drawInk();
+}
+function show(v){
+  if (v === current) return;
+  const from = $('v-' + current), to = $('v-' + v);
+  const dir = ORDER.indexOf(v) > ORDER.indexOf(current) ? 1 : -1;
+  from.getAnimations().forEach(a => a.cancel()); to.getAnimations().forEach(a => a.cancel());
+  from.classList.remove('on'); from.classList.add('leaving');
+  to.classList.add('on'); to.classList.remove('leaving');
+  if (!reduce){
+    const out = from.animate([{ opacity:1, transform:'none' }, { opacity:0, transform:`translateX(${-28 * dir}px)` }], { duration:200, easing:'cubic-bezier(.32,0,.67,0)', fill:'forwards' });
+    out.onfinish = () => { from.classList.remove('leaving'); out.cancel(); };
+    to.animate([{ opacity:0, transform:`translateX(${36 * dir}px)` }, { opacity:1, transform:'none' }], { duration:420, delay:60, easing:EASE, fill:'backwards' });
+  } else { from.classList.remove('leaving'); to.animate([{ opacity:0 }, { opacity:1 }], { duration:200 }); }
+  document.querySelectorAll('.tab').forEach(t => { if (t.dataset.v === v) t.setAttribute('aria-current', 'page'); else t.removeAttribute('aria-current'); });
+  current = v; moveTabInd(false);
+  if (v === 'ask') { renderKeyPanel(); scrollMsgs(); }
+  enterEffects(v);
+}
+$('tabbar').addEventListener('click', e => { const b = e.target.closest('.tab'); if (b) show(b.dataset.v); });
+window.addEventListener('resize', () => moveTabInd(true));
+
+/* ============ ASK (Claude) ============ */
+let apiKey = store.get(K_KEY, '');
+let history = store.get(K_CHAT, []);
+let busy = false;
+
+function tripContext(){
+  const tz = (zone) => new Date().toLocaleString('en-CA', { timeZone: zone, weekday:'long', month:'long', day:'numeric', year:'numeric', hour:'numeric', minute:'2-digit' });
+  const days = DAYS.map(d => `## ${d.dow} ${d.mon} ${d.d} — ${d.name} (${d.sub})\nWhere: ${d.where}` + (d.note ? `\nNote: ${d.note[1]}` : '') + '\n' + d.items.map(it => `- ${it.t}: ${it.title}${it.tag ? ' ['+it.tag+']' : ''}${it.body ? ' — ' + it.body : ''}`).join('\n')).join('\n\n');
+  const legs = LEGS.map(l => `- ${l.label}: ${l.from} (${l.fromCity}) → ${l.to} (${l.toCity}). Flight number, times and seat: not added yet.`).join('\n');
+  const steps = STEPS.map((s,i) => `${i+1}. ${s.title}: ${s.body}`).join('\n');
+  const schools = SCHOOLS.map(s => `### ${s.name}\nWhen: ${s.when} · Status: ${s.status} · From Dundas: ${s.drive}\n` + s.rows.map(r => `- ${r[0]}: ${r[1]}`).join('\n') + (s.warn ? `\n- Heads up: ${s.warn}` : '')).join('\n\n');
+  const checklist = GROUPS.map(gp => `${gp.title}:\n` + gp.items.map(it => `- [${prep.done[it[0]] ? 'x' : ' '}] ${it[1]}${it[2] ? ' (' + it[2] + ')' : ''}`).join('\n')).join('\n');
+  const scores = SCHOOLS.map(s => `${s.short}: ` + CRIT.map((c,ci) => `${c} ${prep.scores[s.key+':'+ci] || '–'}/5`).join(', ')).join('\n');
+  return `You are the trip assistant inside Evan's travel app, "Waypoint". Evan is a student based in Barcelona, Spain; he's Canadian (born in Ontario) and also holds a Hungarian passport. He's visiting three Ontario universities for undergraduate engineering, Oct 23 – Nov 1, 2026, staying in Dundas (next to Hamilton) as his home base.
+
+Right now it is ${tz('America/Toronto')} in Ontario and ${tz('Europe/Madrid')} in Barcelona.
+
+How to answer:
+- Be casual, concise and practical, like a friend who planned the trip. Short paragraphs or a few bullets; no long essays.
+- Use the trip data below as the source of truth. If something is marked TBC, not added or not booked, say so plainly. Never invent flight numbers, times, booking details or confirmations.
+- For live things you can't know (traffic, weather today, whether a tour slot is still open), say you can't check live and suggest how Evan can check.
+- Times are Eastern Time (Toronto) unless stated. Europe changes clocks Oct 25, Ontario on Nov 1 at 2:00 AM.
+- You can give general travel, campus-visit and university-application advice too.
+
+# Flights
+${legs}
+Outbound arrives at Toronto Pearson (YYZ). The flight home leaves from Billy Bishop Toronto City Airport (YTZ, Toronto Island), not Pearson.
+
+# Connecting at Washington Dulles (both directions)
+${steps}
+
+# Day-by-day plan
+${days}
+
+# Schools
+${schools}
+
+# Prep checklist (x = done)
+${checklist}
+
+# Evan's scores so far
+${scores}
+
+# Questions Evan plans to ask on tours
+${QUESTIONS.map(q => '- ' + q).join('\n')}
+
+# Time gap to Barcelona
+Oct 23–24: Barcelona +6 h. Oct 25–31: +5 h. Nov 1: +6 h.
+
+# Calendar items (from Evan's Google Calendar, likely online sessions)
+- Sun Oct 25 9:00 AM ET: George for Evan
+- Tue Oct 27 7:00 AM ET: Lisa for Evan
+- Wed Oct 28 2:00 PM ET: George for Evan (clashes with the 2:00 PM TMU tour)
+- Sun Nov 1 8:00 AM EST: George for Evan`;
+}
+
+function md(text){
+  // tiny, safe markdown: escape first, then bold/italic/code, lists and paragraphs
+  const lines = esc(text).split('\n');
+  let html = '', list = null;
+  const inline = s => s.replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/(^|\W)\*(?!\s)(.+?)\*(?=\W|$)/g,'$1<i>$2</i>').replace(/`([^`]+)`/g,'<code class="mono" style="font-size:.9em">$1</code>');
+  const close = () => { if (list){ html += `</${list}>`; list = null; } };
+  for (const raw of lines){
+    const l = raw.trim();
+    let m;
+    if ((m = l.match(/^[-*•]\s+(.*)/))){ if (list !== 'ul'){ close(); html += '<ul>'; list = 'ul'; } html += `<li>${inline(m[1])}</li>`; }
+    else if ((m = l.match(/^\d+[.)]\s+(.*)/))){ if (list !== 'ol'){ close(); html += '<ol>'; list = 'ol'; } html += `<li>${inline(m[1])}</li>`; }
+    else if (!l){ close(); }
+    else if ((m = l.match(/^#{1,6}\s+(.*)/))){ close(); html += `<p><b>${inline(m[1])}</b></p>`; }
+    else { close(); html += `<p>${inline(l)}</p>`; }
+  }
+  close();
+  return html;
+}
+
+const msgs = $('msgs');
+function scrollMsgs(){ requestAnimationFrame(() => { msgs.scrollTop = msgs.scrollHeight; }); }
+function bubble(role, content, isHtml){
+  const d = document.createElement('div');
+  d.className = 'msg ' + role;
+  if (isHtml) d.innerHTML = content; else d.textContent = content;
+  msgs.appendChild(d); return d;
+}
+const SUGS = ['What time should I leave for McMaster?', 'Which TMU slot should I book?', 'Walk me through the Dulles connection', 'What’s still left to sort out?'];
+function renderChat(){
+  msgs.innerHTML = '';
+  if (!history.length){
+    const w = bubble('ai', `<p>Hey Evan. I know your whole trip: flights, the three tours, the day-by-day plan and your checklist. Ask me anything.</p>`, true);
+    w.style.animationDelay = '60ms';
+    const s = document.createElement('div'); s.className = 'sugs';
+    s.innerHTML = SUGS.map(q => `<button class="sug press" type="button">${esc(q)}</button>`).join('');
+    s.addEventListener('click', e => { const b = e.target.closest('.sug'); if (b) send(b.textContent); });
+    msgs.appendChild(s);
+  } else {
+    history.forEach(m => bubble(m.role === 'user' ? 'me' : 'ai', m.role === 'user' ? m.content : md(m.content), m.role !== 'user'));
+  }
+  scrollMsgs();
+}
+
+function renderKeyPanel(force){
+  const p = $('keyPanel');
+  if (apiKey && !force){ p.innerHTML = ''; p.style.flex = ''; msgs.style.display = ''; return; }
+  msgs.style.display = apiKey ? '' : 'none';
+  p.style.flex = apiKey ? '0 0 auto' : '1 1 auto'; p.style.overflowY = 'auto';
+  p.innerHTML = `<div class="keycard rise"><h2>${apiKey ? 'Your API key' : 'Connect Claude'}</h2><p>Paste a Claude API key from console.anthropic.com. It’s saved only on this device, never in the app file.</p><label for="keyIn">API key</label><input id="keyIn" type="password" autocomplete="off" spellcheck="false" placeholder="sk-ant-…" value="${esc(apiKey)}"><button class="btn press" id="keySave" type="button">${apiKey ? 'Update key' : 'Save and start chatting'}</button>${apiKey ? '<button class="btn ghost press" id="keyDel" type="button">Remove key from this device</button>' : ''}<p class="fine">Calls go straight from your phone to Anthropic and use your account’s credits. Don’t paste the key into the HTML if you share or host this file.</p></div>`;
+  $('keySave').onclick = () => {
+    const v = $('keyIn').value.trim();
+    if (!v){ $('keyIn').focus(); return; }
+    apiKey = v; store.set(K_KEY, v); renderKeyPanel(); renderChat(); updateSend();
+  };
+  const del = $('keyDel'); if (del) del.onclick = () => { apiKey = ''; store.del(K_KEY); renderKeyPanel(); updateSend(); };
+}
+$('keyBtn').addEventListener('click', () => { const open = $('keyPanel').innerHTML && apiKey; renderKeyPanel(!open); });
+$('clearBtn').addEventListener('click', () => { if (busy) return; history = []; store.set(K_CHAT, history); renderChat(); });
+
+const input = $('chatInput'), sendBtn = $('sendBtn');
+function updateSend(){ sendBtn.disabled = busy || !input.value.trim(); }
+input.addEventListener('input', () => { input.style.height = 'auto'; input.style.height = Math.min(120, input.scrollHeight) + 'px'; updateSend(); });
+input.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey && !e.isComposing){ e.preventDefault(); $('chatForm').requestSubmit(); } });
+$('chatForm').addEventListener('submit', e => { e.preventDefault(); send(input.value); });
+
+async function send(text){
+  text = (text || '').trim();
+  if (!text || busy) return;
+  if (!apiKey){ renderKeyPanel(true); return; }
+  if (!history.length) msgs.innerHTML = '';
+  input.value = ''; input.style.height = 'auto';
+  history.push({ role:'user', content:text });
+  bubble('me', text);
+  const out = bubble('ai', '<span class="typing" aria-label="Thinking"><i></i><i></i><i></i></span>', true);
+  scrollMsgs();
+  busy = true; updateSend();
+  let reply = '';
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{
+        'content-type':'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version':'2023-06-01',
+        'anthropic-dangerous-direct-browser-access':'true'
+      },
+      body: JSON.stringify({ model: MODEL, max_tokens: 1024, stream: true, system: tripContext(), messages: history.slice(-20) })
+    });
+    if (!res.ok){
+      let msg = `Something went wrong (${res.status}).`;
+      try { const j = await res.json(); if (j && j.error && j.error.message) msg = j.error.message; } catch(err){}
+      if (res.status === 401) msg = 'That API key didn’t work. Tap the key button to check it.';
+      if (res.status === 429) msg = 'Rate limited. Wait a moment and try again.';
+      if (res.status === 529) msg = 'Claude is overloaded right now. Try again in a minute.';
+      throw new Error(msg);
+    }
+    const reader = res.body.getReader(), dec = new TextDecoder();
+    let buf = '';
+    for (;;){
+      const { value, done } = await reader.read();
+      if (done) break;
+      buf += dec.decode(value, { stream:true });
+      let i;
+      while ((i = buf.indexOf('\n\n')) >= 0){
+        const chunk = buf.slice(0, i); buf = buf.slice(i + 2);
+        const line = chunk.split('\n').find(l => l.startsWith('data:'));
+        if (!line) continue;
+        let ev; try { ev = JSON.parse(line.slice(5).trim()); } catch(err){ continue; }
+        if (ev.type === 'content_block_delta' && ev.delta && ev.delta.type === 'text_delta'){
+          reply += ev.delta.text; out.innerHTML = md(reply); scrollMsgs();
+        } else if (ev.type === 'error'){
+          throw new Error((ev.error && ev.error.message) || 'The response was interrupted.');
+        }
+      }
+    }
+    if (!reply) throw new Error('No reply came back. Try again.');
+    history.push({ role:'assistant', content: reply });
+    store.set(K_CHAT, history.slice(-40));
+  } catch (err){
+    history.pop();
+    out.remove();
+    const msg = err && err.message === 'Failed to fetch' ? 'Couldn’t reach Claude. Check your connection.' : (err && err.message) || 'Something went wrong.';
+    bubble('err', msg);
+    input.value = text; updateSend();
+  } finally {
+    busy = false; updateSend(); scrollMsgs();
+  }
+}
+
+
+/* ============ keep host-injected overlays (hosting badge) off the tab bar ============ */
+(function(){
+  const keep = n => n.id === 'app' || ['SCRIPT','STYLE','LINK','META','NOSCRIPT','HEAD','BODY'].includes(n.nodeName);
+  const sweep = root => Array.from(root.children).forEach(n => { if (!keep(n)) n.style.setProperty('display','none','important'); });
+  const obs = new MutationObserver(() => { sweep(document.body); sweep(document.documentElement); });
+  obs.observe(document.body, { childList:true }); obs.observe(document.documentElement, { childList:true });
+  sweep(document.body);
+})();
+
+/* ============ boot ============ */
+paintPrep(); renderScores(); renderChat();
+reveal($('headline'));
+setOpen(focusIdx, true);
+requestAnimationFrame(() => {
+  moveTabInd(true); measureRail();
+  stagger(document.querySelectorAll('#lines .line-chip'), { delay:300, step:60, y:10 });
+});
+})();
+</script>
+</body>
+</html>
