@@ -820,20 +820,30 @@ function buildTrack(){
   const r0 = route.getBoundingClientRect().top;
   stY = stations.map(st => st.querySelector('.mark').getBoundingClientRect().top - r0 + 22);
   cx = stations[0].querySelector('.mark').getBoundingClientRect().left - route.getBoundingClientRect().left + 14;
-  // flight days: each step in an open day becomes a stop for the plane
+  // every step of an open day is a stop; anything airport-related is a plane stop
   subDocks = [];
-  [0, N - 1].forEach(k => {
-    if (!stations[k].classList.contains('open')) return;
+  const AIRPORT = /Flight \d|Check in|check-in|Connect at|Land at|Pearson|Billy Bishop|YTZ|YYZ|Dulles|airport/i;
+  stations.forEach((st, k) => {
+    if (!st.classList.contains('open')) return;
     const items = DAYS[k].items;
-    stations[k].querySelectorAll('.stops li').forEach((li, j) => {
+    st.querySelectorAll('.stops li').forEach((li, j) => {
       const r = li.getBoundingClientRect();
       if (r.height < 4) return;
       const y = r.top - r0 + Math.min(40, r.height / 2);
       if (y < stY[k] + OFF + 20) return;
       const it = items[j], t = it.title;
       const m = /Flight \d\s*·\s*(.+)/.exec(t);
-      const mode = m ? 'air' : /Check in|Connect|Land at|Online check-in|Leave for Pearson/.test(t) ? 'ground' : 'rail';
-      const cap = m ? [m[1], 'In the air'] : /Check in/.test(t) ? ['BCN', 'At the gate'] : /Connect/.test(t) ? ['Dulles', 'Connecting'] : /Land at/.test(t) ? ['YYZ', 'Landed'] : /→ Dundas/.test(t) ? ['Dundas', 'Driving there'] : /Billy Bishop/.test(t) ? ['YTZ', 'Heading over'] : [t.split(' ')[0], it.t];
+      const plane = it.kind === 'flight' || AIRPORT.test(t) || AIRPORT.test(it.body || '') && /airport|Pearson|Billy Bishop/i.test(t);
+      const mode = m ? 'air' : plane ? 'ground' : 'rail';
+      const cap = m ? [m[1], 'In the air']
+        : /Check in/.test(t) ? ['BCN', 'At the gate']
+        : /Online check-in/.test(t) ? ['Check-in', 'Opens 24 h before']
+        : /Connect/.test(t) ? ['Dulles', 'Connecting']
+        : /Land at/.test(t) ? ['YYZ', 'Landed']
+        : /Pearson → Dundas/.test(t) ? ['YYZ', 'Leaving the airport']
+        : /Billy Bishop/.test(t) ? ['YTZ', 'Off to the airport']
+        : /Leave for Pearson/.test(t) ? ['YYZ', 'Off to the airport']
+        : [t, it.t];
       subDocks.push({ y, k, li, mode, cap });
     });
   });
@@ -1019,17 +1029,15 @@ function paintScene(){
 let curSub = null;
 function updateMode(){
   let mode = 'rail', sub = null;
-  const day0 = ty < stY[1] + OFF - 45, dayN = ty > stY[N - 1] + OFF - 45;
-  if (ty < stY[0] + OFF - 30) mode = 'air';                        // flying in at the very top
-  else if (day0 || dayN){
-    const k = day0 ? 0 : N - 1;
-    const subs = subDocks.filter(d => d.k === k);
-    if (subs.length){
-      // the step the vehicle is at or has most recently passed
-      for (const d of subs) if (ty >= d.y - 30) sub = d;
-      mode = sub ? sub.mode : 'ground';
-      if (k === 0 && sub && sub.mode === 'rail' && ty > sub.y + 40) mode = 'rail';
-    } else mode = 'ground';
+  let i = 0; while (i < N - 1 && ty >= stY[i + 1] + OFF - 45) i++;     // which day's stretch we're on
+  const flightDay = i === 0 || i === N - 1;
+  if (ty < stY[0] + OFF - 30) mode = 'air';                             // flying in at the very top
+  else {
+    const subs = subDocks.filter(d => d.k === i);
+    for (const d of subs) if (ty >= d.y - 30) sub = d;
+    if (sub) mode = sub.mode;
+    else if (flightDay) mode = 'ground';                                 // parked at the airport station
+    if (flightDay && mode === 'rail' && i === 0) mode = 'ground';        // the whole travel day stays a plane
   }
   const plane = mode !== 'rail';
   if (plane !== train.classList.contains('plane')) train.classList.toggle('plane', plane);
@@ -1042,7 +1050,7 @@ function updateMode(){
     curSub = sub;
     if (sub){ cap.innerHTML = `${esc(sub.cap[0])}<small>${esc(sub.cap[1])}</small>`; cap.classList.toggle('air', sub.mode === 'air'); }
   }
-  cap.classList.toggle('on', !!sub);
+  cap.classList.toggle('on', !!sub && mode !== 'rail');
   if (sub){ cap.style.transform = `translate(${(pos.x - 104).toFixed(1)}px,${(pos.y - 16).toFixed(1)}px)`; }
   $('sceneTarmac').style.opacity = (sub && sub.mode === 'ground' ? 0.9 : 0).toString();
 }
