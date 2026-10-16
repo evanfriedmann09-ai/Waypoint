@@ -303,6 +303,26 @@ button{cursor:pointer}
 .gap b{display:block;font-size:26px;font-weight:900;letter-spacing:-.03em;line-height:1}
 .gap span{display:block;margin-top:6px;font-size:13px;line-height:1.3;color:var(--ink-2);font-weight:600}
 
+/* flight details form */
+.leg .info{grid-column:2;min-width:0}
+.leg .edit{margin-top:8px;display:inline-flex;align-items:center;gap:6px;min-height:40px;border:0;border-radius:999px;padding:3px 14px 0;background:#EAF1FB;color:#163A73;font-size:14px;font-weight:800}
+.leg .edit.done{background:var(--ok-bg);color:var(--ok-fg)}
+.leg dl{grid-template-columns:repeat(3,minmax(0,1fr))}
+.leg dd.set{color:var(--ink);font-weight:700}
+.leg .extra{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:6px;font-size:13px;color:var(--ink-2);font-weight:600}
+.leg .grow{grid-column:2}
+.leg.open > .grow{grid-template-rows:1fr}
+.fform{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:12px 0 4px}
+.fform label{display:block;font-size:12px;font-weight:800;color:var(--ink-2)}
+.fform input{width:100%;margin-top:4px;border:1.5px solid var(--rail);border-radius:10px;padding:10px 10px 8px;font-size:16px;background:#fff;font-family:var(--font)}
+.fform input:focus{outline:0;border-color:var(--air);box-shadow:0 0 0 3px rgba(37,99,201,.15)}
+.fform .full{grid-column:1 / -1}
+.fform .btns{grid-column:1 / -1;display:flex;gap:8px}
+.fform .btns button{flex:1;min-height:44px;border:0;border-radius:12px;font-weight:800;font-size:15px;padding-top:2px}
+.fform .save{background:var(--ink);color:#fff}
+.fform .clear{background:var(--ground);color:var(--ink-2)}
+.conn{margin-top:8px;display:inline-flex;align-items:center;gap:6px;height:28px;padding:2px 10px 0;border-radius:999px;font-size:13px;font-weight:800}
+
 /* schools as lines */
 .school{margin-top:14px;background:var(--surface);border-radius:24px;overflow:hidden;box-shadow:0 1px 2px rgba(18,23,28,.05),0 10px 26px rgba(18,23,28,.06)}
 .school > button{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:14px;align-items:center;width:100%;border:0;background:var(--c);color:#fff;padding:18px 18px 16px;text-align:left}
@@ -759,6 +779,48 @@ $('lines').innerHTML = SCHOOLS.map(s => {
   return `<button class="line-chip press" data-day="${i}"><span class="bullet" style="--c:${LINEC[SKEY[s.key]]}">${LETTER[SKEY[s.key]]}</span><span class="lt"><b>${esc(s.short)}</b><span>${d.dow} ${d.mon} ${d.d}</span></span></button>`;
 }).join('');
 
+/* ============ flight details (entered on the Flights tab) ============ */
+const K_FL = 'waypoint.flights.v1';
+let FL = store.get(K_FL, null) || [{}, {}, {}, {}];
+const LEG_AT = [[0, 1], [0, 3], [N - 1, 2], [N - 1, 4]];        // leg -> [day, item index] in the plan
+const ORIG = DAYS.map(d => d.items.map(it => Object.assign({}, it)));
+const to12 = hm => { if (!/^\d{1,2}:\d{2}$/.test(hm || '')) return ''; let [h, m] = hm.split(':').map(Number); const ap = h >= 12 ? 'PM' : 'AM'; h = h % 12 || 12; return `${h}:${String(m).padStart(2, '0')} ${ap}`; };
+const shift = (hm, mins) => { if (!/^\d{1,2}:\d{2}$/.test(hm || '')) return ''; let [h, m] = hm.split(':').map(Number); let t = (h * 60 + m + mins + 1440) % 1440; return `${String(Math.floor(t / 60)).padStart(2, '0')}:${String(t % 60).padStart(2, '0')}`; };
+const minsBetween = (a, b) => { if (!a || !b) return null; const [h1, m1] = a.split(':').map(Number), [h2, m2] = b.split(':').map(Number); let d = (h2 * 60 + m2) - (h1 * 60 + m1); if (d < 0) d += 1440; return d; };
+const fmtDur = m => `${Math.floor(m / 60)} h ${String(m % 60).padStart(2, '0')} m`;
+function legDetails(i){
+  const f = FL[i] || {};
+  const bits = [];
+  if (f.no) bits.push(f.no.toUpperCase());
+  if (f.dep) bits.push(`departs ${to12(f.dep)}`);
+  if (f.arr) bits.push(`arrives ${to12(f.arr)}`);
+  if (f.seat) bits.push(`seat ${f.seat.toUpperCase()}`);
+  if (f.ref) bits.push(`booking ${f.ref.toUpperCase()}`);
+  return bits;
+}
+function applyFlights(){
+  // reset the travel days, then layer in whatever has been entered
+  [0, N - 1].forEach(k => DAYS[k].items = ORIG[k].map(it => Object.assign({}, it)));
+  LEG_AT.forEach(([k, j], i) => {
+    const f = FL[i] || {}, it = DAYS[k].items[j];
+    if (f.dep) it.t = to12(f.dep);
+    const bits = legDetails(i);
+    if (bits.length){ it.body = bits.join(' · ') + '.'; it.tag = f.no ? f.no.toUpperCase() : 'Added'; TAGC[it.tag] = ['var(--ok-bg)', 'var(--ok-fg)']; }
+  });
+  const o = DAYS[0].items, h = DAYS[N - 1].items;
+  if (FL[0].dep) o[0].t = to12(shift(FL[0].dep, -180));                       // be at BCN 3 h before
+  if (FL[0].arr) o[2].t = to12(FL[0].arr);                                    // land at IAD
+  const c1 = minsBetween(FL[0].arr, FL[1].dep);
+  if (c1 != null) o[2].body = `Connection time ${fmtDur(c1)}${c1 < 90 ? ' (tight, so move fast)' : ''}. Customs, collect your bag, drop it again, then security. Steps on the Flights tab.`;
+  if (FL[1].arr) o[4].t = to12(FL[1].arr);
+  if (FL[2].dep) h[1].t = to12(shift(FL[2].dep, -180));                       // leave Dundas ~3 h before (1 h drive + 2 h early)
+  if (FL[2].arr) h[3].t = to12(FL[2].arr);
+  const c2 = minsBetween(FL[2].arr, FL[3].dep);
+  if (c2 != null) h[3].body = `Connection time ${fmtDur(c2)}${c2 < 90 ? ' (tight, so move fast)' : ''}. You enter the US again, so customs and a bag recheck.`;
+  LEGS.forEach((l, i) => { l.details = legDetails(i).join(', '); });
+}
+applyFlights();
+
 function stationHTML(d, i){
   const school = d.items.find(it => it.kind.startsWith('school') && (it.tag === 'Booked' || it.tag === 'To book' || it.tag === 'Register'));
   const past = todayIdx >= 0 && i < todayIdx, here = i === todayIdx;
@@ -1164,24 +1226,80 @@ if (!reduce && 'IntersectionObserver' in window){
 }
 
 /* ============ FLIGHTS: journeys ============ */
-function legHTML(leg){
-  return `<li class="leg">${ICON.plane}<dl><div><dt>Flight</dt><dd class="mono">[—]</dd></div><div><dt>Departs</dt><dd class="mono">[—]</dd></div><div><dt>Arrives</dt><dd class="mono">[—]</dd></div></dl></li>`;
+function legHTML(i){
+  const f = FL[i] || {}, set = !!(f.no || f.dep || f.arr);
+  const v = x => x ? `<dd class="mono set">${esc(x)}</dd>` : '<dd class="mono">[—]</dd>';
+  const extra = [f.seat ? `Seat ${esc(f.seat.toUpperCase())}` : '', f.ref ? `Booking ${esc(f.ref.toUpperCase())}` : ''].filter(Boolean).join('<span aria-hidden="true">·</span>');
+  return `<li class="leg" data-leg="${i}">${ICON.plane}<div class="info"><dl><div><dt>Flight</dt>${v(f.no ? f.no.toUpperCase() : '')}</div><div><dt>Departs</dt>${v(to12(f.dep))}</div><div><dt>Arrives</dt>${v(to12(f.arr))}</div></dl>
+    ${extra ? `<div class="extra">${extra}</div>` : ''}
+    <button class="edit press ${set ? 'done' : ''}" aria-expanded="false" aria-controls="ff${i}">${set ? 'Edit details' : 'Add flight details'}</button></div>
+    <div class="grow" id="ff${i}"><div><form class="fform" data-leg="${i}" autocomplete="off">
+      <label class="full">Flight number<input name="no" placeholder="e.g. UA 989" value="${esc(f.no || '')}" autocapitalize="characters"></label>
+      <label>Departs (local)<input name="dep" type="time" value="${esc(f.dep || '')}"></label>
+      <label>Arrives (local)<input name="arr" type="time" value="${esc(f.arr || '')}"></label>
+      <label>Seat<input name="seat" placeholder="e.g. 24A" value="${esc(f.seat || '')}" autocapitalize="characters"></label>
+      <label>Booking ref<input name="ref" placeholder="e.g. K7Q2LP" value="${esc(f.ref || '')}" autocapitalize="characters"></label>
+      <div class="btns"><button type="button" class="clear press">Clear</button><button type="submit" class="save press">Save flight</button></div>
+    </form></div></div></li>`;
 }
 function apHTML(code, city, sub, change, id){
   const stepsList = `<ol class="steps">${STEPS.map(s => `<li><div><b>${esc(s.title)}</b><span>${esc(s.body)}</span></div></li>`).join('')}</ol>`;
   return `<li class="ap ${change ? 'change' : ''}"><span class="m" aria-hidden="true"></span><div><span class="code mono">${code}</span><span class="city">${esc(city)}${sub ? ' · ' + esc(sub) : ''}</span></div>${change ? '' : ''}
     ${change ? `<button class="change-btn press" aria-expanded="false" aria-controls="${id}"><span>Change here: customs and bag recheck</span>${ICON.chev}</button><div class="grow" id="${id}"><div>${stepsList}</div></div>` : ''}</li>`;
 }
-$('journeys').innerHTML = [
-  { title:'Out · Fri Oct 23', stops:[['BCN','Barcelona','be there 3 h early'], 0, ['IAD','Washington Dulles','',true], 1, ['YYZ','Toronto Pearson','then 45–60 min to Dundas']] },
-  { title:'Home · Sun Nov 1', stops:[['YTZ','Toronto Island','tunnel or ferry from Bathurst St'], 2, ['IAD','Washington Dulles','',true], 3, ['BCN','Barcelona','lands Mon Nov 2']] }
-].map((j, ji) => `<article class="journey"><header><span>${j.title}</span><span class="tag" style="${tagStyle('Add details')}">Add flight details</span></header><ol class="jl">${j.stops.map(s => typeof s === 'number' ? legHTML(LEGS[s]) : apHTML(s[0], s[1], s[2], s[3], 'chg' + ji)).join('')}</ol></article>`).join('');
+const JOURNEYS = [
+  { title:'Out · Fri Oct 23', legs:[0, 1], stops:[['BCN','Barcelona','be there 3 h early'], 0, ['IAD','Washington Dulles','',true], 1, ['YYZ','Toronto Pearson','then 45–60 min to Dundas']] },
+  { title:'Home · Sun Nov 1', legs:[2, 3], stops:[['YTZ','Toronto Island','tunnel or ferry from Bathurst St'], 2, ['IAD','Washington Dulles','',true], 3, ['BCN','Barcelona','lands Mon Nov 2']] }
+];
+function renderJourneys(){
+  $('journeys').innerHTML = JOURNEYS.map((j, ji) => {
+    const done = j.legs.every(i => FL[i].no && FL[i].dep && FL[i].arr);
+    const conn = minsBetween(FL[j.legs[0]].arr, FL[j.legs[1]].dep);
+    return `<article class="journey"><header><span>${j.title}</span><span class="tag" style="${tagStyle(done ? 'Booked' : 'Add details')}">${done ? 'All set' : 'Add flight details'}</span></header><ol class="jl">${j.stops.map(st => {
+      if (typeof st === 'number') return legHTML(st);
+      let html = apHTML(st[0], st[1], st[2], st[3], 'chg' + ji);
+      if (st[3] && conn != null) html = html.replace('<button class="change-btn', `<span class="conn" style="${tagStyle(conn < 90 ? 'Clash' : 'Booked')}">Connection ${fmtDur(conn)}${conn < 90 ? ', tight' : ''}</span><button class="change-btn`);
+      return html;
+    }).join('')}</ol></article>`;
+  }).join('');
+}
+renderJourneys();
 $('journeys').addEventListener('click', e => {
+  const ed = e.target.closest('.leg .edit');
+  if (ed){
+    const leg = ed.closest('.leg'), open = !leg.classList.contains('open');
+    leg.classList.toggle('open', open); ed.setAttribute('aria-expanded', String(open));
+    if (open) setTimeout(() => { const inp = leg.querySelector('input[name="no"]'); try { inp.focus({ preventScroll:true }); } catch(err){} }, 350);
+    return;
+  }
+  const cl = e.target.closest('.fform .clear');
+  if (cl){ const i = +cl.closest('form').dataset.leg; FL[i] = {}; saveFlights(i, 'Flight details cleared'); return; }
   const b = e.target.closest('.change-btn'); if (!b) return;
   const ap = b.parentElement, open = !ap.classList.contains('open');
   ap.classList.toggle('open', open); b.setAttribute('aria-expanded', String(open));
   if (open) stagger(ap.querySelectorAll('.steps li'), { delay:100, step:50, y:8, dur:420 });
 });
+$('journeys').addEventListener('submit', e => {
+  const form = e.target.closest('.fform'); if (!form) return;
+  e.preventDefault();
+  const i = +form.dataset.leg, fd = new FormData(form);
+  FL[i] = { no:(fd.get('no') || '').trim(), dep:fd.get('dep') || '', arr:fd.get('arr') || '', seat:(fd.get('seat') || '').trim(), ref:(fd.get('ref') || '').trim() };
+  saveFlights(i, `${LEGS[i].from} → ${LEGS[i].to} saved`);
+});
+function saveFlights(i, msg){
+  store.set(K_FL, FL);
+  applyFlights();
+  renderJourneys();
+  // refresh the two travel days on the line, keeping whether they're open
+  [0, N - 1].forEach(k => {
+    const li = stations[k], wasOpen = li.classList.contains('open');
+    const tmp = document.createElement('ol'); tmp.innerHTML = stationHTML(DAYS[k], k);
+    li.innerHTML = tmp.firstElementChild.innerHTML;
+    if (wasOpen){ li.classList.add('open'); li.querySelector('button').setAttribute('aria-expanded', 'true'); }
+  });
+  if (typeof buildTrack === 'function') requestAnimationFrame(buildTrack);
+  toast(msg);
+}
 // the .grow rule keys off .open > .grow; journeys put grow inside .ap
 const apStyle = document.createElement('style'); apStyle.textContent = '.ap.open > .grow{grid-template-rows:1fr}'; document.head.appendChild(apStyle);
 
@@ -1446,7 +1564,7 @@ let busy = false;
 function tripContext(){
   const tz = (zone) => new Date().toLocaleString('en-CA', { timeZone: zone, weekday:'long', month:'long', day:'numeric', year:'numeric', hour:'numeric', minute:'2-digit' });
   const days = DAYS.map(d => `## ${d.dow} ${d.mon} ${d.d} — ${d.name} (${d.sub})\nWhere: ${d.where}` + (d.note ? `\nNote: ${d.note[1]}` : '') + '\n' + d.items.map(it => `- ${it.t}: ${it.title}${it.tag ? ' ['+it.tag+']' : ''}${it.body ? ' — ' + it.body : ''}`).join('\n')).join('\n\n');
-  const legs = LEGS.map(l => `- ${l.label}: ${l.from} (${l.fromCity}) → ${l.to} (${l.toCity}). Flight number, times and seat: not added yet.`).join('\n');
+  const legs = LEGS.map(l => `- ${l.label}: ${l.from} (${l.fromCity}) → ${l.to} (${l.toCity}). ${l.details ? 'Details: ' + l.details + ' (times are local to each airport).' : 'Flight number, times and seat: not added yet.'}`).join('\n');
   const steps = STEPS.map((s,i) => `${i+1}. ${s.title}: ${s.body}`).join('\n');
   const schools = SCHOOLS.map(s => `### ${s.name}\nWhen: ${s.when} · Status: ${s.status} · From Dundas: ${s.drive}\n` + s.rows.map(r => `- ${r[0]}: ${r[1]}`).join('\n') + (s.warn ? `\n- Heads up: ${s.warn}` : '')).join('\n\n');
   const checklist = GROUPS.map(gp => `${gp.title}:\n` + gp.items.map(it => `- [${prep.done[it[0]] ? 'x' : ' '}] ${it[1]}${it[2] ? ' (' + it[2] + ')' : ''}`).join('\n')).join('\n');
