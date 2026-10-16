@@ -80,8 +80,32 @@ button{cursor:pointer}
 .track::before{content:"";position:absolute;inset:0 2px;background:repeating-linear-gradient(to bottom,#CDBFAE 0 4px,transparent 4px 13px);border-radius:3px;opacity:.9}
 .track::after{content:"";position:absolute;top:0;bottom:0;left:7px;right:7px;border-left:3px solid #9AA5AB;border-right:3px solid #9AA5AB}
 .track .lit{position:absolute;top:0;left:7px;right:7px;height:0;border-left:3px solid var(--trunk);border-right:3px solid var(--trunk);z-index:1}
+/* curving svg track */
+.tracksvg{position:absolute;left:0;top:0;width:100%;overflow:visible;z-index:1;pointer-events:none}
+.features{position:absolute;inset:0;pointer-events:none;z-index:0}
+.features.over{z-index:6}
+.water{position:absolute;border-radius:14px;overflow:hidden;background:#5C9BC9;box-shadow:inset 0 0 0 2px rgba(255,255,255,.35)}
+.water::before{content:"";position:absolute;inset:-20px 0;background:repeating-linear-gradient(170deg,rgba(255,255,255,0) 0 9px,rgba(255,255,255,.45) 9px 11px,rgba(255,255,255,0) 11px 22px);animation:waves 3.2s linear infinite}
+@keyframes waves{to{transform:translateX(22px)}}
+.girder{position:absolute;width:3px;border-radius:2px;background:#3B4650;z-index:3}
+.road{position:absolute;height:18px;margin-top:-9px;background:#6B747B;border-radius:3px}
+.road::after{content:"";position:absolute;left:4px;right:4px;top:8px;height:2px;background:repeating-linear-gradient(90deg,#fff 0 6px,transparent 6px 11px);opacity:.8}
+.gate{position:absolute;width:5px;height:26px;margin:-13px 0 0 -2.5px;border-radius:2px;background:repeating-linear-gradient(180deg,#E5483A 0 4px,#fff 4px 8px);box-shadow:0 1px 2px rgba(18,23,28,.3);transform:scaleY(.18);transform-origin:50% 0;transition:transform 520ms var(--spring);z-index:3}
+.crossing.closed .gate{transform:scaleY(1)}
+.xlight{position:absolute;width:7px;height:7px;margin:-3.5px;border-radius:50%;background:#4A3330;z-index:3}
+.crossing.closed .xlight{animation:blink 700ms steps(1) infinite}
+.crossing.closed .xlight.b{animation-delay:350ms}
+@keyframes blink{0%{background:#FF4B3A;box-shadow:0 0 8px 3px rgba(255,75,58,.7)}50%{background:#4A3330;box-shadow:none}}
+.hill{position:absolute;border-radius:22px;background:radial-gradient(ellipse at 40% 35%,#93AD55,#6E8B3D 60%,#5A7431);box-shadow:0 3px 8px rgba(18,23,28,.18)}
+.hill .portal{position:absolute;left:50%;width:26px;height:12px;margin-left:-13px;background:#1A1F24;border:3px solid #9AA0A4}
+.hill .portal.n{top:-3px;border-radius:12px 12px 3px 3px;border-bottom:0}
+.hill .portal.s{bottom:-3px;border-radius:3px 3px 12px 12px;border-top:0}
+.hill .lbl{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:9px;font-weight:900;letter-spacing:.06em;color:rgba(255,255,255,.85);text-transform:uppercase;white-space:nowrap}
+.wagon{position:absolute;width:16px;height:30px;margin:-15px 0 0 -8px;border-radius:4px;background:#9C4A2B;box-shadow:inset 0 0 0 2px rgba(0,0,0,.18),0 2px 3px rgba(18,23,28,.25);z-index:3}
+.wagon::after{content:"";position:absolute;left:4px;right:4px;top:5px;bottom:5px;border-radius:2px;background:repeating-linear-gradient(180deg,rgba(0,0,0,.18) 0 2px,transparent 2px 5px)}
+
 /* the train (top-down, nose pointing down the line) */
-.train{position:absolute;left:calc(var(--tx) - 14px);top:0;width:28px;height:82px;z-index:4;pointer-events:none;will-change:transform}
+.train{position:absolute;left:0;top:0;width:28px;height:82px;transform-origin:14px 41px;z-index:4;pointer-events:none;will-change:transform}
 .train .body{width:28px;height:82px;transition:transform 520ms var(--spring);transform-origin:50% 50%}
 .train.up .body{transform:rotate(180deg)}
 .train.moving .body svg{animation:chug 180ms linear infinite alternate}
@@ -89,7 +113,7 @@ button{cursor:pointer}
 .train .beam{position:absolute;left:50%;top:76px;width:46px;height:70px;margin-left:-23px;background:radial-gradient(ellipse at 50% 0,rgba(242,178,51,.55),rgba(242,178,51,0) 70%);opacity:.35;transition:opacity 300ms ease}
 .train.moving .beam{opacity:1}
 .train.up .beam{transform:rotate(180deg);transform-origin:50% -35px}
-.puffs{position:absolute;inset:0;pointer-events:none;z-index:5}
+.puffs{position:absolute;inset:0;pointer-events:none;z-index:7}
 .puff{position:absolute;width:22px;height:22px;margin:-11px 0 0 -11px;border-radius:50%;
   background:radial-gradient(circle at 38% 35%,rgba(255,255,255,.95) 0 18%,rgba(196,202,207,.95) 42%,rgba(118,127,134,.92) 100%);
   box-shadow:0 2px 6px rgba(18,23,28,.18);animation:puff var(--life,1600ms) cubic-bezier(.23,1,.32,1) forwards;will-change:transform,opacity}
@@ -317,7 +341,7 @@ button{cursor:pointer}
         <p>10 days, 3 universities, 4 flights. Tap a station for the plan.</p>
       </div>
       <nav class="lines" aria-label="Jump to a school" id="lines"></nav>
-      <ol class="route" id="route"><div class="track" id="track" aria-hidden="true"><span class="lit" id="lit"></span></div><div class="train" id="train" aria-hidden="true"><div class="body"><svg width="28" height="82" viewBox="0 0 28 82"><g fill="#2B343C"><rect x="1" y="5" width="3" height="6" rx="1"/><rect x="24" y="5" width="3" height="6" rx="1"/><rect x="1" y="21" width="3" height="6" rx="1"/><rect x="24" y="21" width="3" height="6" rx="1"/><rect x="0" y="42" width="3" height="7" rx="1"/><rect x="25" y="42" width="3" height="7" rx="1"/><rect x="0" y="64" width="3" height="7" rx="1"/><rect x="25" y="64" width="3" height="7" rx="1"/></g><rect x="4" y="1" width="20" height="31" rx="6" fill="#12171C"/><rect x="11.5" y="5" width="5" height="23" rx="2.5" fill="#34404A"/><g fill="#8FC7F0"><rect x="5.5" y="6" width="2" height="4" rx="1"/><rect x="5.5" y="13" width="2" height="4" rx="1"/><rect x="5.5" y="20" width="2" height="4" rx="1"/><rect x="20.5" y="6" width="2" height="4" rx="1"/><rect x="20.5" y="13" width="2" height="4" rx="1"/><rect x="20.5" y="20" width="2" height="4" rx="1"/></g><rect x="4" y="26" width="20" height="2.5" fill="#F2B233"/><rect x="12" y="32" width="4" height="6" fill="#5B6772"/><rect x="3" y="38" width="22" height="41" rx="8" fill="#12171C"/><rect x="3" y="51" width="22" height="3" fill="#F2B233"/><circle cx="14" cy="45" r="3.8" fill="#34404A"/><circle cx="14" cy="45" r="1.8" fill="#0A0D10"/><rect x="9" y="56" width="10" height="3" rx="1.5" fill="#34404A"/><rect x="6" y="61" width="16" height="9" rx="3" fill="#8FC7F0"/><rect x="6" y="61" width="16" height="3" rx="1.5" fill="#CDE8FA"/><circle class="hl" cx="9.5" cy="75" r="2" fill="#FFD36B"/><circle class="hl" cx="18.5" cy="75" r="2" fill="#FFD36B"/></svg></div><span class="beam"></span></div><div class="scenery" id="scenery" aria-hidden="true"></div><div class="puffs" id="puffs"></div></ol>
+      <ol class="route" id="route"><div class="features" id="features" aria-hidden="true"></div><svg class="tracksvg" id="trackSvg" aria-hidden="true"></svg><div class="features over" id="featuresTop" aria-hidden="true"></div><div class="train" id="train" aria-hidden="true"><div class="body"><svg width="28" height="82" viewBox="0 0 28 82"><g fill="#2B343C"><rect x="1" y="5" width="3" height="6" rx="1"/><rect x="24" y="5" width="3" height="6" rx="1"/><rect x="1" y="21" width="3" height="6" rx="1"/><rect x="24" y="21" width="3" height="6" rx="1"/><rect x="0" y="42" width="3" height="7" rx="1"/><rect x="25" y="42" width="3" height="7" rx="1"/><rect x="0" y="64" width="3" height="7" rx="1"/><rect x="25" y="64" width="3" height="7" rx="1"/></g><rect x="4" y="1" width="20" height="31" rx="6" fill="#12171C"/><rect x="11.5" y="5" width="5" height="23" rx="2.5" fill="#34404A"/><g fill="#8FC7F0"><rect x="5.5" y="6" width="2" height="4" rx="1"/><rect x="5.5" y="13" width="2" height="4" rx="1"/><rect x="5.5" y="20" width="2" height="4" rx="1"/><rect x="20.5" y="6" width="2" height="4" rx="1"/><rect x="20.5" y="13" width="2" height="4" rx="1"/><rect x="20.5" y="20" width="2" height="4" rx="1"/></g><rect x="4" y="26" width="20" height="2.5" fill="#F2B233"/><rect x="12" y="32" width="4" height="6" fill="#5B6772"/><rect x="3" y="38" width="22" height="41" rx="8" fill="#12171C"/><rect x="3" y="51" width="22" height="3" fill="#F2B233"/><circle cx="14" cy="45" r="3.8" fill="#34404A"/><circle cx="14" cy="45" r="1.8" fill="#0A0D10"/><rect x="9" y="56" width="10" height="3" rx="1.5" fill="#34404A"/><rect x="6" y="61" width="16" height="9" rx="3" fill="#8FC7F0"/><rect x="6" y="61" width="16" height="3" rx="1.5" fill="#CDE8FA"/><circle class="hl" cx="9.5" cy="75" r="2" fill="#FFD36B"/><circle class="hl" cx="18.5" cy="75" r="2" fill="#FFD36B"/></svg></div><span class="beam"></span></div><div class="scenery" id="scenery" aria-hidden="true"></div><div class="puffs" id="puffs"></div></ol>
       <div class="end"><span></span><i aria-hidden="true"></i><span>End of the line · back in Barcelona Mon Nov 2</span></div>
     </div>
   </section>
@@ -696,41 +720,141 @@ $('lines').addEventListener('click', e => {
   if (!reduce) stations[i].querySelector('.mark').animate([{ transform:'scale(1)' }, { transform:'scale(1.35)' }, { transform:'scale(1)' }], { duration:700, delay:350, easing:EASE });
 });
 
-/* track geometry + the train */
-const trackEl = $('track'), lit = $('lit'), train = $('train'), puffs = $('puffs'), tripScroll = $('tripScroll');
-let railTop = 0, railH = 1, stY = [];
-const OFF = 56; // the train pulls up just below each station so the roundel stays visible
-function measureRail(){
+/* track geometry: a curving line with a siding, a bridge, a tunnel and a level crossing */
+const svgNS = 'http://www.w3.org/2000/svg';
+const trackSvg = $('trackSvg'), features = $('features'), featuresTop = $('featuresTop');
+const train = $('train'), puffs = $('puffs'), tripScroll = $('tripScroll');
+const OFF = 56;                       // the train pulls up just below each station so the roundel stays visible
+const FEAT = { 0:'siding', 2:'bridge', 4:'tunnel', 6:'crossing' };   // segment i -> i+1
+let stY = [], cx = 0, railTop = 0, railEnd = 0, samples = [], total = 1, litPath = null, crossings = [];
+function seg(i){ const a = stY[i] + 34, b = stY[i + 1] - 22; return { a, b, m:(a + b) / 2 }; }
+function buildTrack(){
+  stations.forEach((st, i) => { st.style.marginBottom = (FEAT[i] && FEAT[i] !== 'siding') ? '64px' : ''; });
   const r0 = route.getBoundingClientRect().top;
   stY = stations.map(st => st.querySelector('.mark').getBoundingClientRect().top - r0 + 22);
-  railTop = stY[0] - 30;
-  railH = Math.max(1, stY[N - 1] + OFF + 56 - railTop);
-  trackEl.style.top = railTop + 'px';
-  trackEl.style.height = railH + 'px';
+  cx = stations[0].querySelector('.mark').getBoundingClientRect().left - route.getBoundingClientRect().left + 14;
+  railTop = stY[0] - 30; railEnd = stY[N - 1] + OFF + 60;
+  let d = `M ${cx} ${railTop} L ${cx} ${stY[0]}`;
+  for (let i = 0; i < N - 1; i++){
+    const { a, b, m } = seg(i);
+    d += ` L ${cx} ${a}`;
+    if (FEAT[i] || b - a < 40){ d += ` L ${cx} ${b}`; }
+    else {
+      const A = (i % 4 < 2 ? 1 : -1) * Math.min(17, (b - a) / 5);      // alternating S-bends
+      const k = (m - a) * 0.55;
+      d += ` C ${cx} ${a + k} ${cx + A} ${m - k} ${cx + A} ${m} C ${cx + A} ${m + k} ${cx} ${b - k} ${cx} ${b}`;
+    }
+    d += ` L ${cx} ${stY[i + 1]}`;
+  }
+  d += ` L ${cx} ${railEnd}`;
+  const H = railEnd + 40;
+  trackSvg.setAttribute('height', H); trackSvg.style.height = H + 'px';
+  trackSvg.setAttribute('viewBox', `0 0 ${route.clientWidth} ${H}`);
+  // siding: peels off left below the first station and rejoins
+  let sidingD = '';
+  if (N > 1){
+    const { a, b } = seg(0);
+    if (b - a > 70){
+      const s0 = a + 6, s1 = b - 6, sx = cx - 22;
+      sidingD = `M ${cx} ${s0} C ${cx} ${s0 + 18} ${sx} ${s0 + 14} ${sx} ${s0 + 32} L ${sx} ${s1 - 32} C ${sx} ${s1 - 14} ${cx} ${s1 - 18} ${cx} ${s1}`;
+    }
+  }
+  trackSvg.innerHTML = `
+    <defs>
+      <mask id="rm" maskUnits="userSpaceOnUse" x="0" y="0" width="${route.clientWidth}" height="${H}">
+        <path d="${d}" stroke="#fff" stroke-width="19" fill="none"/>${sidingD ? `<path d="${sidingD}" stroke="#fff" stroke-width="19" fill="none"/>` : ''}
+        <path d="${d}" stroke="#000" stroke-width="13" fill="none"/>${sidingD ? `<path d="${sidingD}" stroke="#000" stroke-width="13" fill="none"/>` : ''}
+      </mask>
+    </defs>
+    ${sidingD ? `<path d="${sidingD}" stroke="#CDBFAE" stroke-width="27" stroke-dasharray="4 9" fill="none"/>` : ''}
+    <path d="${d}" stroke="#CDBFAE" stroke-width="28" stroke-dasharray="4 9" fill="none"/>
+    <g mask="url(#rm)">
+      ${sidingD ? `<path d="${sidingD}" stroke="#9AA5AB" stroke-width="19" fill="none"/>` : ''}
+      <path d="${d}" stroke="#9AA5AB" stroke-width="19" fill="none"/>
+      <path id="litPath" d="${d}" stroke="#12171C" stroke-width="19" fill="none"/>
+    </g>`;
+  litPath = $('litPath');
+  // sample the path once so the train can follow it cheaply
+  const probe = document.createElementNS(svgNS, 'path'); probe.setAttribute('d', d);
+  trackSvg.appendChild(probe); probe.style.visibility = 'hidden';
+  total = probe.getTotalLength(); samples = [];
+  for (let L = 0; L <= total; L += 3){ const p = probe.getPointAtLength(L); samples.push([L, p.x, p.y]); }
+  const last = probe.getPointAtLength(total); samples.push([total, last.x, last.y]);
+  probe.remove();
+  litPath.setAttribute('stroke-dasharray', `0 ${total + 10}`);
+  buildFeatures(sidingD);
   buildScenery();
   kick();
 }
+/* lookups along the sampled path (y increases monotonically along the line) */
+function idxAtY(y){ let lo = 0, hi = samples.length - 1; while (hi - lo > 1){ const mid = (lo + hi) >> 1; if (samples[mid][2] < y) lo = mid; else hi = mid; } return lo; }
+function atY(y){
+  if (!samples.length) return { x:cx, y, L:0, ang:0 };
+  const i = idxAtY(y), s0 = samples[i], s1 = samples[Math.min(samples.length - 1, i + 1)];
+  const f = s1[2] === s0[2] ? 0 : Math.max(0, Math.min(1, (y - s0[2]) / (s1[2] - s0[2])));
+  const x = s0[1] + (s1[1] - s0[1]) * f, L = s0[0] + (s1[0] - s0[0]) * f;
+  const a = samples[Math.max(0, i - 2)], b = samples[Math.min(samples.length - 1, i + 3)];
+  const ang = -Math.atan2(b[1] - a[1], b[2] - a[2]) * 180 / Math.PI;
+  return { x, y, L, ang };
+}
+const xAtY = y => atY(y).x;
+
+function buildFeatures(sidingD){
+  let lo = '', hi = '';
+  crossings = [];
+  const left = cx - 30, w = 60;
+  if (N > 2){                                   // bridge over a creek
+    const { a, b, m } = seg(2); const h = Math.min(46, b - a - 10);
+    if (h > 20){
+      lo += `<div class="water" style="left:${cx - 29}px;width:58px;top:${m - h / 2}px;height:${h}px"></div>`;
+      lo += `<div class="girder" style="left:${cx - 15}px;top:${m - h / 2 - 4}px;height:${h + 8}px"></div><div class="girder" style="left:${cx + 12}px;top:${m - h / 2 - 4}px;height:${h + 8}px"></div>`;
+    }
+  }
+  if (N > 4){                                   // tunnel through a hill into Toronto
+    const { a, b } = seg(4); const t0 = a + 10, t1 = b - 10;
+    if (t1 - t0 > 40) hi += `<div class="hill" style="left:${cx - 26}px;width:52px;top:${t0}px;height:${t1 - t0}px"><span class="portal n"></span><span class="portal s"></span>${t1 - t0 > 70 ? '<span class="lbl">Tunnel</span>' : ''}</div>`;
+  }
+  if (N > 6){                                   // level crossing on the road to Oshawa
+    const { m } = seg(6);
+    lo += `<div class="crossing" data-y="${m}"><div class="road" style="left:${cx - 28}px;width:56px;top:${m}px"></div>
+      <span class="gate" style="left:${cx - 21}px;top:${m - 13}px"></span><span class="gate" style="left:${cx + 21}px;top:${m - 13}px"></span>
+      <span class="xlight a" style="left:${cx - 21}px;top:${m - 17}px"></span><span class="xlight b" style="left:${cx + 21}px;top:${m + 17}px"></span></div>`;
+  }
+  if (sidingD){                                 // a parked freight wagon on the siding
+    const { a, b } = seg(0);
+    lo += `<span class="wagon" style="left:${cx - 22}px;top:${(a + b) / 2}px"></span>`;
+  }
+  features.innerHTML = lo; featuresTop.innerHTML = hi;
+  crossings = Array.from(features.querySelectorAll('.crossing')).map(el => ({ el, y:+el.dataset.y }));
+}
+
 /* trackside scenery: autumn maples, bushes, lamps, and a signal before every station */
 const scenery = $('scenery');
-let signals = [];
+let signals = [], signalEls = [];
 function rng(seed){ return () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; }; }
+function sceneryBlocked(y){
+  if (stY.some(sy => Math.abs(y - sy) < 26)) return true;
+  for (const i of [0, 2, 4, 6]) if (i < N - 1){ const { a, b } = seg(i); if (y > a && y < b) return true; }
+  return false;
+}
 function buildScenery(){
-  const tx = trackEl.offsetLeft + 15;           // centre line of the track in route coordinates
   const rand = rng(20261023);
   const FALL = ['#D9632B','#C2412D','#E8A23A','#B5532A','#E3B341','#8E9B3A'];
+  const minX = cx - 30, maxX = cx + 29;
   let html = '';
   signals = [];
-  const near = y => stY.some(sy => Math.abs(y - sy) < 26 || Math.abs(y - (sy + OFF)) < 2 && false);
-  for (let y = railTop + 14; y < railTop + railH - 10; y += 19){
+  for (let y = railTop + 14; y < railEnd - 10; y += 19){
+    const tx = xAtY(y);
     for (const side of [-1, 1]){
-      if (near(y)) continue;
-      const r = rand();
-      const x = tx + side * (side < 0 ? 22 + rand() * 3 : 21 + rand() * 1.5);
+      const r = rand(), j = rand(), sz0 = rand(), c2 = rand(), col = rand(), yo = rand();
+      if (sceneryBlocked(y)) continue;
+      const x = tx + side * (side < 0 ? 22 + j * 3 : 21 + j * 1.5);
+      if (x < minX - 2 || x > maxX) continue;
       if (r < 0.5){
-        const sz = side < 0 ? 10 + Math.round(rand() * 4) : 9 + Math.round(rand() * 2);
-        html += `<span class="tree ${rand() < .35 ? 'c2' : ''}" style="left:${x.toFixed(1)}px;top:${(y + rand() * 8).toFixed(1)}px;--sz:${sz}px;--c:${FALL[Math.floor(rand() * FALL.length)]}"></span>`;
+        const sz = side < 0 ? 10 + Math.round(sz0 * 4) : 9 + Math.round(sz0 * 2);
+        html += `<span class="tree ${c2 < .35 ? 'c2' : ''}" style="left:${x.toFixed(1)}px;top:${(y + yo * 8).toFixed(1)}px;--sz:${sz}px;--c:${FALL[Math.floor(col * FALL.length)]}"></span>`;
       } else if (r < 0.68){
-        html += `<span class="bush" style="left:${(x - side * 2).toFixed(1)}px;top:${(y + rand() * 10).toFixed(1)}px"></span>`;
+        html += `<span class="bush" style="left:${(x - side * 2).toFixed(1)}px;top:${(y + yo * 10).toFixed(1)}px"></span>`;
       } else if (r < 0.74){
         html += `<span class="lamp" style="left:${(tx + side * 21).toFixed(1)}px;top:${y.toFixed(1)}px"></span>`;
       }
@@ -740,12 +864,11 @@ function buildScenery(){
     if (i === 0) return;
     const y = sy - 36;
     signals.push(y);
-    html += `<span class="signal red" data-y="${y}" style="left:${(tx + 21).toFixed(1)}px;top:${y.toFixed(1)}px"></span>`;
+    html += `<span class="signal red" style="left:${(xAtY(y) + 21).toFixed(1)}px;top:${y.toFixed(1)}px"></span>`;
   });
   scenery.innerHTML = html;
   signalEls = Array.from(scenery.querySelectorAll('.signal'));
 }
-let signalEls = [];
 
 /* where the train should be: follows a line 42% down the screen, and dwells at stations */
 function targetY(){
@@ -753,25 +876,27 @@ function targetY(){
   let t = tripScroll.scrollTop + tripScroll.clientHeight * 0.42 - routeTop;
   const maxScroll = tripScroll.scrollHeight - tripScroll.clientHeight;
   const remaining = maxScroll - tripScroll.scrollTop, blend = tripScroll.clientHeight * 0.35;
-  if (remaining < blend) t += (stY[N - 1] + OFF - t) * (1 - Math.max(0, remaining) / blend);   // ease into the terminus
+  if (remaining < blend) t += (stY[N - 1] + OFF - t) * (1 - Math.max(0, remaining) / blend);
   t = Math.max(stY[0] + OFF, Math.min(stY[N - 1] + OFF, t));
   let best = 0; for (let i = 1; i < N; i++) if (Math.abs(stY[i] + OFF - t) < Math.abs(stY[best] + OFF - t)) best = i;
   const d = t - (stY[best] + OFF), zone = 70;
-  if (Math.abs(d) < zone) t = stY[best] + OFF + d * Math.pow(Math.abs(d) / zone, 2);   // slow into the platform
+  if (Math.abs(d) < zone) t = stY[best] + OFF + d * Math.pow(Math.abs(d) / zone, 2);
   return t;
 }
-let ty = null, tv = 0, tLast = 0, running = false, lastPuff = 0, arrivedAt = -1;
+let ty = null, tv = 0, tLast = 0, running = false, lastPuff = 0, arrivedAt = -1, pos = { x:0, y:0, L:0, ang:0 };
 function render(){
-  train.style.transform = `translate3d(0,${(ty - 40).toFixed(2)}px,0)`;
-  lit.style.height = Math.max(0, ty - railTop).toFixed(1) + 'px';
+  pos = atY(ty);
+  train.style.transform = `translate3d(${(pos.x - 14).toFixed(2)}px,${(pos.y - 41).toFixed(2)}px,0) rotate(${pos.ang.toFixed(2)}deg)`;
+  if (litPath) litPath.setAttribute('stroke-dasharray', `${Math.max(0, pos.L).toFixed(1)} ${total + 10}`);
   const moving = Math.abs(tv) > 25;
   train.classList.toggle('moving', moving);
   if (Math.abs(tv) > 60) train.classList.toggle('up', tv < 0);
   for (let i = 0; i < signalEls.length; i++){
-    const passed = ty - 40 > signals[i];          // the whole train is past the signal
+    const passed = ty - 40 > signals[i];
     signalEls[i].classList.toggle('green', passed);
     signalEls[i].classList.toggle('red', !passed);
   }
+  for (const c of crossings) c.el.classList.toggle('closed', Math.abs(ty - c.y) < 150);
   let arr = -1; for (let i = 0; i < N; i++) if (Math.abs(stY[i] + OFF - ty) < 8 && Math.abs(tv) < 60) arr = i;
   if (arr !== arrivedAt){
     if (arrivedAt >= 0) stations[arrivedAt].classList.remove('arrived');
@@ -786,27 +911,27 @@ function puff(now){
   if (moving ? now - lastPuff < Math.max(45, 110 - speed * 0.08) : now - lastIdle < 650) return;
   if (moving) lastPuff = now; else lastIdle = now;
   const up = train.classList.contains('up');
-  const chimneyY = ty + (up ? -5 : 5);              // chimney sits just behind the cab
-  const back = up ? 1 : -1;                          // smoke trails behind the direction of travel
+  const rad = -pos.ang * Math.PI / 180, ux = Math.sin(rad), uy = Math.cos(rad);   // unit vector down the line
+  const off = up ? -5 : 5;
+  const back = up ? 1 : -1;
   const el = document.createElement('span');
   el.className = 'puff' + (Math.random() < 0.35 ? ' dark' : '');
-  el.style.left = `calc(var(--tx) + ${(Math.random() * 4 - 2).toFixed(1)}px)`;
-  el.style.top = chimneyY + 'px';
+  el.style.left = (pos.x + ux * off + Math.random() * 4 - 2).toFixed(1) + 'px';
+  el.style.top = (pos.y + uy * off).toFixed(1) + 'px';
   const drift = moving ? 40 + Math.min(70, speed * 0.12) : 26;
-  el.style.setProperty('--dx', (12 + Math.random() * 26 * (Math.random() < .3 ? -1 : 1)).toFixed(0) + 'px');   // a light breeze off the lake
-  el.style.setProperty('--dy', (back * (drift + Math.random() * 30)).toFixed(0) + 'px');
+  el.style.setProperty('--dx', (ux * back * drift + 12 + Math.random() * 26 * (Math.random() < .3 ? -1 : 1)).toFixed(0) + 'px');
+  el.style.setProperty('--dy', (uy * back * (drift + Math.random() * 30)).toFixed(0) + 'px');
   el.style.setProperty('--s', (moving ? 2.6 + Math.random() * 1.2 : 1.8 + Math.random() * .6).toFixed(2));
   el.style.setProperty('--life', (moving ? 1500 + Math.random() * 500 : 1900).toFixed(0) + 'ms');
   puffs.appendChild(el);
   el.addEventListener('animationend', () => el.remove());
-  // leaves whipped up off the track
   if (moving && speed > 120 && now - lastLeaf > 160 && puffs.childElementCount < 34){
     lastLeaf = now;
     const lf = document.createElement('span');
     const side = Math.random() < .5 ? -1 : 1;
     lf.className = 'leaf';
-    lf.style.left = `calc(var(--tx) + ${side * 10}px)`;
-    lf.style.top = (ty + (up ? -30 : 30)) + 'px';
+    lf.style.left = (pos.x + side * 10) + 'px';
+    lf.style.top = (pos.y + (up ? -30 : 30)) + 'px';
     lf.style.setProperty('--c', ['#D9632B','#C2412D','#E8A23A','#E3B341'][Math.floor(Math.random() * 4)]);
     lf.style.setProperty('--dx', (side * (24 + Math.random() * 30)).toFixed(0) + 'px');
     lf.style.setProperty('--dy', (back * (10 + Math.random() * 40)).toFixed(0) + 'px');
@@ -815,13 +940,12 @@ function puff(now){
     lf.addEventListener('animationend', () => lf.remove());
   }
 }
-/* gentle idle smoke while parked at a station */
 setInterval(() => { if (!running && !reduce && $('v-trip').classList.contains('on') && ty !== null) puff(performance.now()); }, 700);
 function step(now){
   const dt = Math.min(0.034, (now - (tLast || now)) / 1000 || 0.016); tLast = now;
   const target = targetY();
   if (reduce){ ty = target; tv = 0; render(); running = false; return; }
-  const k = 150, c = 2 * Math.sqrt(k) * 0.92;                 // spring: response ~0.5s, a touch of overshoot on arrival
+  const k = 150, c = 2 * Math.sqrt(k) * 0.92;
   tv += ((target - ty) * k - c * tv) * dt;
   ty += tv * dt;
   render(); puff(now);
@@ -830,12 +954,14 @@ function step(now){
 }
 function kick(){
   if (!stY.length) return;
-  if (ty === null) ty = stY[0] - 150;          // the train rolls in from up the line on load
+  if (ty === null) ty = stY[0] - 150;
   if (!running){ running = true; tLast = 0; requestAnimationFrame(step); }
 }
 const drawInk = kick;
+const measureRail = buildTrack;
 tripScroll.addEventListener('scroll', kick, { passive:true });
-try { new ResizeObserver(measureRail).observe(route); } catch(e){ window.addEventListener('resize', measureRail); }
+let rebuildRaf = 0;
+try { new ResizeObserver(() => { cancelAnimationFrame(rebuildRaf); rebuildRaf = requestAnimationFrame(buildTrack); }).observe(route); } catch(e){ window.addEventListener('resize', buildTrack); }
 
 /* stations pop as the line reaches them */
 if (!reduce && 'IntersectionObserver' in window){
