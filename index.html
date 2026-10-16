@@ -104,6 +104,31 @@ button{cursor:pointer}
 .wagon{position:absolute;width:16px;height:30px;margin:-15px 0 0 -8px;border-radius:4px;background:#9C4A2B;box-shadow:inset 0 0 0 2px rgba(0,0,0,.18),0 2px 3px rgba(18,23,28,.25);z-index:3}
 .wagon::after{content:"";position:absolute;left:4px;right:4px;top:5px;bottom:5px;border-radius:2px;background:repeating-linear-gradient(180deg,rgba(0,0,0,.18) 0 2px,transparent 2px 5px)}
 
+/* scenes: the trip view's background follows the train */
+.scenes{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden;background:var(--ground)}
+#v-trip .scroll{position:relative;z-index:1}
+#v-trip .top{background:rgba(255,255,255,.5)}
+#v-trip .top.edge{box-shadow:0 1px 0 rgba(18,23,28,.08)}
+.scene{position:absolute;inset:0;opacity:0;will-change:opacity}
+.scene svg{position:absolute;inset:0;width:100%;height:100%}
+.scene .deco{opacity:.55}
+.cloud{position:absolute;width:var(--w);height:calc(var(--w) * .42);border-radius:999px;background:#fff;filter:blur(1px);opacity:.9;box-shadow:calc(var(--w) * .28) calc(var(--w) * -.12) 0 calc(var(--w) * -.06) #fff,calc(var(--w) * -.26) calc(var(--w) * -.08) 0 calc(var(--w) * -.1) #fff;animation:drift var(--t) linear infinite}
+@keyframes drift{from{transform:translateX(-140px)}to{transform:translateX(560px)}}
+.fleaf{position:absolute;top:-20px;width:12px;height:12px;border-radius:0 70% 0 70%;background:var(--c);opacity:.75;animation:fall var(--t) linear infinite;animation-delay:var(--d)}
+@keyframes fall{0%{transform:translate(0,0) rotate(0)}100%{transform:translate(var(--x),110vh) rotate(720deg)}}
+.twinkle{animation:tw 3s ease-in-out infinite alternate}
+@keyframes tw{from{opacity:.25}to{opacity:.9}}
+.spin{transform-origin:330px 150px;animation:spin 24s linear infinite}
+.spin.fast{animation-duration:2.4s}
+@keyframes spin{to{transform:rotate(360deg)}}
+.bat{animation:bat 6s ease-in-out infinite alternate}
+@keyframes bat{from{transform:translate(0,0)}to{transform:translate(30px,-14px)}}
+.ripple{animation:rip 4s ease-in-out infinite alternate}
+@keyframes rip{from{transform:translateX(-8px)}to{transform:translateX(8px)}}
+.scene-dark,.scene-water{position:absolute;inset:0;opacity:0}
+.scene-dark{background:radial-gradient(ellipse at 50% 45%,rgba(18,23,28,.15),rgba(18,23,28,.55))}
+.scene-water{background:linear-gradient(180deg,rgba(92,155,201,.05),rgba(92,155,201,.35))}
+
 /* plane mode: the train becomes a plane on flight days */
 .train .jet{position:absolute;left:50%;top:50%;width:52px;height:54px;margin:-27px 0 0 -26px;opacity:0;transform:scale(.3) rotate(-20deg);transition:transform 620ms var(--spring),opacity 260ms ease}
 .train .jet .shadow{position:absolute;left:10px;top:14px;opacity:.22;filter:blur(2px)}
@@ -375,8 +400,9 @@ button{cursor:pointer}
 
   <!-- TRIP -->
   <section class="view on" id="v-trip" aria-label="Trip">
+    <div class="scenes" id="scenes" aria-hidden="true"><div class="scene" style="background:linear-gradient(180deg,#BFDDF7 0%,#DCEDFB 45%,#F1F7FC 100%)"><span class="cloud" style="--w:77px;--t:42s;top:36%;animation-delay:-7s"></span><span class="cloud" style="--w:123px;--t:66s;top:64%;animation-delay:-41s"></span><span class="cloud" style="--w:108px;--t:51s;top:16%;animation-delay:-31s"></span><span class="cloud" style="--w:63px;--t:62s;top:59%;animation-delay:-38s"></span><span class="cloud" style="--w:60px;--t:66s;top:38%;animation-delay:-46s"></span><span class="cloud" style="--w:89px;--t:44s;top:44%;animation-delay:-1s"></span><span class="cloud" style="--w:62px;--t:39s;top:87%;animation-delay:-34s"></span><span class="cloud" style="--w:61px;--t:62s;top:31%;animation-delay:-27s"></span><span class="cloud" style="--w:63px;--t:52s;top:60%;animation-delay:-60s"></span></div><div class="scene" style="background:linear-gradient(180deg,#FBE2C6 0%,#FCEEDD 50%,#FBF5EC 100%)"><svg class="deco" viewBox="0 0 400 900" preserveAspectRatio="xMidYMid slice"><g fill="#E39A4F"><circle cx="40" cy="840" r="70"/><circle cx="120" cy="870" r="60"/><circle cx="300" cy="850" r="80"/><circle cx="380" cy="880" r="60"/></g><g fill="#C9612F"><circle cx="80" cy="880" r="50"/><circle cx="230" cy="890" r="55"/></g></svg><span class="fleaf" style="left:7%;--c:#D9632B;--t:10s;--d:-11s;--x:46px"></span><span class="fleaf" style="left:21%;--c:#E8A23A;--t:13s;--d:-6s;--x:17px"></span><span class="fleaf" style="left:4%;--c:#B5532A;--t:11s;--d:-13s;--x:21px"></span><span class="fleaf" style="left:50%;--c:#B5532A;--t:14s;--d:-14s;--x:4px"></span><span class="fleaf" style="left:34%;--c:#D9632B;--t:9s;--d:-11s;--x:-1px"></span><span class="fleaf" style="left:40%;--c:#E3B341;--t:15s;--d:-5s;--x:11px"></span><span class="fleaf" style="left:22%;--c:#C2412D;--t:12s;--d:-0s;--x:-38px"></span><span class="fleaf" style="left:41%;--c:#C2412D;--t:11s;--d:-11s;--x:5px"></span><span class="fleaf" style="left:86%;--c:#B5532A;--t:11s;--d:-14s;--x:41px"></span><span class="fleaf" style="left:53%;--c:#B5532A;--t:14s;--d:-11s;--x:-14px"></span><span class="fleaf" style="left:57%;--c:#C2412D;--t:15s;--d:-14s;--x:23px"></span><span class="fleaf" style="left:67%;--c:#C2412D;--t:16s;--d:-8s;--x:58px"></span></div><div class="scene" style="background:linear-gradient(180deg,#DCD6F0 0%,#EAE6F6 50%,#F6F4FA 100%)"><svg class="deco" viewBox="0 0 400 900" preserveAspectRatio="xMidYMid slice"><circle cx="330" cy="150" r="70" fill="none" stroke="#7D6BB8" stroke-width="5"/><line x1="390.0" y1="150.0" x2="396.0" y2="150.0" stroke="#7D6BB8" stroke-width="4"/><line x1="382.0" y1="180.0" x2="387.2" y2="183.0" stroke="#7D6BB8" stroke-width="4"/><line x1="360.0" y1="202.0" x2="363.0" y2="207.2" stroke="#7D6BB8" stroke-width="4"/><line x1="330.0" y1="210.0" x2="330.0" y2="216.0" stroke="#7D6BB8" stroke-width="4"/><line x1="300.0" y1="202.0" x2="297.0" y2="207.2" stroke="#7D6BB8" stroke-width="4"/><line x1="278.0" y1="180.0" x2="272.8" y2="183.0" stroke="#7D6BB8" stroke-width="4"/><line x1="270.0" y1="150.0" x2="264.0" y2="150.0" stroke="#7D6BB8" stroke-width="4"/><line x1="278.0" y1="120.0" x2="272.8" y2="117.0" stroke="#7D6BB8" stroke-width="4"/><line x1="300.0" y1="98.0" x2="297.0" y2="92.8" stroke="#7D6BB8" stroke-width="4"/><line x1="330.0" y1="90.0" x2="330.0" y2="84.0" stroke="#7D6BB8" stroke-width="4"/><line x1="360.0" y1="98.0" x2="363.0" y2="92.8" stroke="#7D6BB8" stroke-width="4"/><line x1="382.0" y1="120.0" x2="387.2" y2="117.0" stroke="#7D6BB8" stroke-width="4"/><line class="spin" x1="330" y1="150" x2="330" y2="104" stroke="#7D6BB8" stroke-width="5" stroke-linecap="round"/><line class="spin fast" x1="330" y1="150" x2="370" y2="150" stroke="#7D6BB8" stroke-width="3" stroke-linecap="round"/><g fill="#7D6BB8"><circle class="twinkle" cx="60" cy="90" r="3"/><circle class="twinkle" cx="150" cy="200" r="2.5" style="animation-delay:1s"/><circle class="twinkle" cx="90" cy="320" r="2" style="animation-delay:2s"/><circle class="twinkle" cx="250" cy="60" r="2.5" style="animation-delay:.5s"/></g></svg></div><div class="scene" style="background:linear-gradient(180deg,#E3F1D2 0%,#EEF7E4 50%,#F7FBF1 100%)"><svg class="deco" viewBox="0 0 400 900" preserveAspectRatio="xMidYMid slice"><path d="M0 760 Q100 700 200 750 T400 730 V900 H0Z" fill="#A8C77A"/><path d="M0 820 Q120 770 240 820 T400 800 V900 H0Z" fill="#88AD57"/><g stroke="#88AD57" stroke-width="3" fill="none"><path d="M40 120 q10 -12 20 0 q10 -12 20 0"/><path d="M290 200 q8 -10 16 0 q8 -10 16 0"/></g></svg></div><div class="scene" style="background:linear-gradient(180deg,#D3ECEF 0%,#E4F3F4 50%,#F2F9F9 100%)"><svg class="deco" viewBox="0 0 400 900" preserveAspectRatio="xMidYMid slice"><g stroke="#6FB3BF" stroke-width="3" fill="none" stroke-linecap="round"><path class="ripple" d="M20 600 q20 -10 40 0 t40 0 t40 0"/><path class="ripple" style="animation-delay:1s" d="M230 680 q20 -10 40 0 t40 0 t40 0"/><path class="ripple" style="animation-delay:2s" d="M60 780 q20 -10 40 0 t40 0 t40 0"/><path class="ripple" style="animation-delay:.5s" d="M250 860 q20 -10 40 0 t40 0"/></g><path d="M0 520 H400" stroke="#9CCDD4" stroke-width="2" opacity=".6"/></svg><span class="cloud" style="--w:90px;--t:57s;top:17%;animation-delay:-46s"></span><span class="cloud" style="--w:110px;--t:68s;top:23%;animation-delay:-5s"></span><span class="cloud" style="--w:68px;--t:39s;top:55%;animation-delay:-35s"></span></div><div class="scene" style="background:linear-gradient(180deg,#DCE6F4 0%,#E9EFF8 50%,#F4F7FC 100%)"><svg class="deco" viewBox="0 0 400 900" preserveAspectRatio="xMidYMid slice"><g fill="#9DB4D6"><rect x="10" y="720" width="40" height="180"/><rect x="55" y="680" width="34" height="220"/><rect x="95" y="740" width="46" height="160"/><rect x="200" y="700" width="30" height="200"/><rect x="236" y="660" width="38" height="240"/><rect x="280" y="730" width="44" height="170"/><rect x="330" y="690" width="36" height="210"/><rect x="370" y="750" width="40" height="150"/></g><g fill="#7F9BC6"><rect x="166" y="560" width="10" height="340"/><ellipse cx="171" cy="610" rx="16" ry="9"/><rect x="169" y="460" width="4" height="100"/></g></svg></div><div class="scene" style="background:linear-gradient(180deg,#F3DDE6 0%,#F8EAF0 50%,#FBF5F8 100%)"><svg class="deco" viewBox="0 0 400 900" preserveAspectRatio="xMidYMid slice"><g fill="#C88AA3"><path d="M20 900 V760 l30 -40 l30 40 V900Z"/><rect x="90" y="740" width="120" height="160"/><path d="M90 740 l60 -50 l60 50Z"/><rect x="140" y="650" width="20" height="40"/><path d="M135 650 l15 -25 l15 25Z"/><rect x="230" y="770" width="150" height="130"/><path d="M230 770 l75 -45 l75 45Z"/></g><g fill="#F8EAF0"><rect x="110" y="780" width="12" height="22" rx="6"/><rect x="144" y="780" width="12" height="22" rx="6"/><rect x="178" y="780" width="12" height="22" rx="6"/><rect x="255" y="800" width="12" height="20" rx="6"/><rect x="300" y="800" width="12" height="20" rx="6"/><rect x="345" y="800" width="12" height="20" rx="6"/></g></svg></div><div class="scene" style="background:linear-gradient(180deg,#FBE0D0 0%,#FCEDE3 50%,#FDF6F1 100%)"><svg class="deco" viewBox="0 0 400 900" preserveAspectRatio="xMidYMid slice"><path d="M150 520 L250 520 L400 900 L0 900Z" fill="#E7B79B"/><g stroke="#FDF6F1" stroke-width="6" stroke-dasharray="26 22"><path d="M200 530 L200 900"/></g><circle cx="320" cy="140" r="40" fill="#F2A37A"/></svg></div><div class="scene" style="background:linear-gradient(180deg,#E2D8F0 0%,#EEE6F3 45%,#FBEFE3 100%)"><svg class="deco" viewBox="0 0 400 900" preserveAspectRatio="xMidYMid slice"><circle cx="320" cy="130" r="56" fill="#F6D58C"/><circle cx="342" cy="118" r="50" fill="#E2D8F0"/><g fill="#5D4A86" class="bat"><path d="M60 180 q12 -14 24 0 q6 -6 12 0 q6 -6 12 0 q12 -14 24 0 q-18 4 -36 14 q-18 -10 -36 -14z"/></g><g fill="#5D4A86" class="bat" style="animation-delay:2s"><path d="M200 90 q8 -10 16 0 q4 -4 8 0 q4 -4 8 0 q8 -10 16 0 q-12 3 -24 10 q-12 -7 -24 -10z"/></g><g fill="#E58A3A"><ellipse cx="70" cy="860" rx="38" ry="30"/><ellipse cx="330" cy="870" rx="30" ry="24"/></g><g fill="#7A8F3A"><rect x="66" y="822" width="8" height="12" rx="2"/><rect x="326" y="840" width="7" height="10" rx="2"/></g></svg></div><div class="scene" style="background:linear-gradient(180deg,#F9D3B9 0%,#FAE3D3 35%,#E6EEF8 100%)"><svg class="deco" viewBox="0 0 400 900" preserveAspectRatio="xMidYMid slice"><circle cx="300" cy="200" r="64" fill="#F6B07E"/></svg><span class="cloud" style="--w:119px;--t:61s;top:38%;animation-delay:-8s"></span><span class="cloud" style="--w:83px;--t:38s;top:47%;animation-delay:-32s"></span><span class="cloud" style="--w:119px;--t:43s;top:46%;animation-delay:-35s"></span><span class="cloud" style="--w:65px;--t:62s;top:25%;animation-delay:-45s"></span><span class="cloud" style="--w:117px;--t:65s;top:24%;animation-delay:-10s"></span><span class="cloud" style="--w:90px;--t:41s;top:18%;animation-delay:-8s"></span><span class="cloud" style="--w:124px;--t:42s;top:53%;animation-delay:-50s"></span></div><div class="scene-water" id="sceneWater"></div><div class="scene-dark" id="sceneDark"></div></div>
     <div class="scroll" id="tripScroll">
-      <div class="top"><span class="brand"><span class="bullet sm" aria-hidden="true">W</span>Waypoint</span><span class="pill">Oct 23 – Nov 1</span></div>
+      <div class="top"><span class="brand"><span class="bullet sm" aria-hidden="true">W</span>Waypoint</span><span class="pill" id="sceneName">Oct 23 – Nov 1</span></div>
       <div class="hero">
         <h1 id="headline">Ontario trip</h1>
         <p>10 days, 3 universities, 4 flights. Tap a station for the plan.</p>
@@ -929,8 +955,30 @@ function targetY(){
   return t;
 }
 let ty = null, tv = 0, tLast = 0, running = false, lastPuff = 0, arrivedAt = -1, pos = { x:0, y:0, L:0, ang:0 };
+const sceneEls = Array.from(document.querySelectorAll('#scenes .scene')), sceneDark = $('sceneDark'), sceneWater = $('sceneWater');
+const SCENE_NAMES = ['In the air','Fall colours','Clocks go back','Open fields','Lakeside morning','Downtown Toronto','Hamilton campus','Road to Oshawa','Halloween night','Flight home'];
+let sceneShown = -1;
+const smooth = (a, b, x) => { const t = Math.max(0, Math.min(1, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
+function paintScene(){
+  if (!stY.length || ty === null) return;
+  const dock = stY.map(y => y + OFF);
+  let i = 0; while (i < N - 1 && ty >= dock[i + 1]) i++;
+  const f = i >= N - 1 ? 0 : (ty - dock[i]) / (dock[i + 1] - dock[i]);
+  const wNext = smooth(0.3, 0.75, f);                       // the next scene fades in over the back half of the run
+  for (let k = 0; k < sceneEls.length; k++){
+    const w = k === i ? 1 - wNext : k === i + 1 ? wNext : 0;
+    sceneEls[k].style.opacity = w.toFixed(3);
+  }
+  const lead = Math.min(N - 1, wNext > .5 ? i + 1 : i);
+  if (lead !== sceneShown){ sceneShown = lead; $('sceneName').textContent = SCENE_NAMES[lead]; }
+  // tunnel darkens, bridge tints the screen blue
+  const inRange = (k, pad) => { if (k >= N - 1) return 0; const { a, b } = seg(k); return Math.min(smooth(a - pad, a + 10, ty), 1 - smooth(b - 10, b + pad, ty)); };
+  sceneDark.style.opacity = (inRange(4, 40) * 0.9).toFixed(3);
+  sceneWater.style.opacity = (inRange(2, 40) * 0.9).toFixed(3);
+}
 function render(){
   pos = atY(ty);
+  paintScene();
   train.style.transform = `translate3d(${(pos.x - 14).toFixed(2)}px,${(pos.y - 41).toFixed(2)}px,0) rotate(${pos.ang.toFixed(2)}deg)`;
   if (litPath) litPath.setAttribute('stroke-dasharray', `${Math.max(0, pos.L).toFixed(1)} ${total + 10}`);
   const moving = Math.abs(tv) > 25;
