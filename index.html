@@ -129,6 +129,24 @@ button{cursor:pointer}
 .scene-dark{background:radial-gradient(ellipse at 50% 45%,rgba(18,23,28,.15),rgba(18,23,28,.55))}
 .scene-water{background:linear-gradient(180deg,rgba(92,155,201,.05),rgba(92,155,201,.35))}
 
+/* plane sub-steps: on the ground vs in the air, with a caption beside the vehicle */
+.train.plane:not(.air) .jet{transform:scale(.8)}
+.train.plane:not(.air) .jet .shadow{transform:translate(-8px,-11px);opacity:.3;animation:none}
+.train.air .jet{transform:scale(1.12)}
+.train.air .jet > svg:last-child{animation:bank 2.6s ease-in-out infinite alternate}
+@keyframes bank{from{transform:rotate(-4deg)}to{transform:rotate(4deg)}}
+.train.air .jet .shadow{transform:translate(8px,10px);opacity:.18;filter:blur(3px)}
+.vcap{position:absolute;left:0;top:0;z-index:8;width:78px;padding:5px 7px 3px;border-radius:9px;background:var(--ink);color:#fff;font-size:11px;font-weight:800;line-height:1.2;text-align:left;pointer-events:none;opacity:0;transition:opacity 220ms ease;box-shadow:0 4px 10px rgba(18,23,28,.2)}
+.vcap.on{opacity:1}
+.vcap small{display:block;font-size:10px;font-weight:700;color:#BFD3EA;margin-top:1px}
+.vcap::after{content:"";position:absolute;right:-5px;top:50%;margin-top:-5px;border:5px solid transparent;border-right:0;border-left-color:var(--ink)}
+.vcap.air small{color:#9CC6FF}
+.stops li{transition:background 260ms ease,box-shadow 260ms ease}
+.stops li.cur{background:#EEF4FF;box-shadow:inset 0 0 0 2px rgba(37,99,201,.35)}
+.stops li:first-child.cur{border-radius:18px 18px 0 0}.stops li:last-child.cur{border-radius:0 0 18px 18px}
+.scene-tarmac{position:absolute;inset:0;opacity:0;background:linear-gradient(180deg,rgba(215,220,224,.0),rgba(205,211,216,.75));}
+.scene-tarmac::after{content:"";position:absolute;left:12%;right:12%;bottom:12%;height:38%;background:repeating-linear-gradient(180deg,transparent 0 26px,rgba(255,255,255,.7) 26px 46px);clip-path:polygon(46% 0,54% 0,100% 100%,0 100%);opacity:.6}
+
 /* plane mode: the train becomes a plane on flight days */
 .train .jet{position:absolute;left:50%;top:50%;width:52px;height:54px;margin:-27px 0 0 -26px;opacity:0;transform:scale(.3) rotate(-20deg);transition:transform 620ms var(--spring),opacity 260ms ease}
 .train .jet .shadow{position:absolute;left:10px;top:14px;opacity:.22;filter:blur(2px)}
@@ -400,7 +418,7 @@ button{cursor:pointer}
 
   <!-- TRIP -->
   <section class="view on" id="v-trip" aria-label="Trip">
-    <div class="scenes" id="scenes" aria-hidden="true"><div class="scene" style="background:linear-gradient(180deg,#BFDDF7 0%,#DCEDFB 45%,#F1F7FC 100%)"><span class="cloud" style="--w:77px;--t:42s;top:36%;animation-delay:-7s"></span><span class="cloud" style="--w:123px;--t:66s;top:64%;animation-delay:-41s"></span><span class="cloud" style="--w:108px;--t:51s;top:16%;animation-delay:-31s"></span><span class="cloud" style="--w:63px;--t:62s;top:59%;animation-delay:-38s"></span><span class="cloud" style="--w:60px;--t:66s;top:38%;animation-delay:-46s"></span><span class="cloud" style="--w:89px;--t:44s;top:44%;animation-delay:-1s"></span><span class="cloud" style="--w:62px;--t:39s;top:87%;animation-delay:-34s"></span><span class="cloud" style="--w:61px;--t:62s;top:31%;animation-delay:-27s"></span><span class="cloud" style="--w:63px;--t:52s;top:60%;animation-delay:-60s"></span></div><div class="scene" style="background:linear-gradient(180deg,#FBE2C6 0%,#FCEEDD 50%,#FBF5EC 100%)"><svg class="deco" viewBox="0 0 400 900" preserveAspectRatio="xMidYMid slice"><g fill="#E39A4F"><circle cx="40" cy="840" r="70"/><circle cx="120" cy="870" r="60"/><circle cx="300" cy="850" r="80"/><circle cx="380" cy="880" r="60"/></g><g fill="#C9612F"><circle cx="80" cy="880" r="50"/><circle cx="230" cy="890" r="55"/></g></svg><span class="fleaf" style="left:7%;--c:#D9632B;--t:10s;--d:-11s;--x:46px"></span><span class="fleaf" style="left:21%;--c:#E8A23A;--t:13s;--d:-6s;--x:17px"></span><span class="fleaf" style="left:4%;--c:#B5532A;--t:11s;--d:-13s;--x:21px"></span><span class="fleaf" style="left:50%;--c:#B5532A;--t:14s;--d:-14s;--x:4px"></span><span class="fleaf" style="left:34%;--c:#D9632B;--t:9s;--d:-11s;--x:-1px"></span><span class="fleaf" style="left:40%;--c:#E3B341;--t:15s;--d:-5s;--x:11px"></span><span class="fleaf" style="left:22%;--c:#C2412D;--t:12s;--d:-0s;--x:-38px"></span><span class="fleaf" style="left:41%;--c:#C2412D;--t:11s;--d:-11s;--x:5px"></span><span class="fleaf" style="left:86%;--c:#B5532A;--t:11s;--d:-14s;--x:41px"></span><span class="fleaf" style="left:53%;--c:#B5532A;--t:14s;--d:-11s;--x:-14px"></span><span class="fleaf" style="left:57%;--c:#C2412D;--t:15s;--d:-14s;--x:23px"></span><span class="fleaf" style="left:67%;--c:#C2412D;--t:16s;--d:-8s;--x:58px"></span></div><div class="scene" style="background:linear-gradient(180deg,#DCD6F0 0%,#EAE6F6 50%,#F6F4FA 100%)"><svg class="deco" viewBox="0 0 400 900" preserveAspectRatio="xMidYMid slice"><circle cx="330" cy="150" r="70" fill="none" stroke="#7D6BB8" stroke-width="5"/><line x1="390.0" y1="150.0" x2="396.0" y2="150.0" stroke="#7D6BB8" stroke-width="4"/><line x1="382.0" y1="180.0" x2="387.2" y2="183.0" stroke="#7D6BB8" stroke-width="4"/><line x1="360.0" y1="202.0" x2="363.0" y2="207.2" stroke="#7D6BB8" stroke-width="4"/><line x1="330.0" y1="210.0" x2="330.0" y2="216.0" stroke="#7D6BB8" stroke-width="4"/><line x1="300.0" y1="202.0" x2="297.0" y2="207.2" stroke="#7D6BB8" stroke-width="4"/><line x1="278.0" y1="180.0" x2="272.8" y2="183.0" stroke="#7D6BB8" stroke-width="4"/><line x1="270.0" y1="150.0" x2="264.0" y2="150.0" stroke="#7D6BB8" stroke-width="4"/><line x1="278.0" y1="120.0" x2="272.8" y2="117.0" stroke="#7D6BB8" stroke-width="4"/><line x1="300.0" y1="98.0" x2="297.0" y2="92.8" stroke="#7D6BB8" stroke-width="4"/><line x1="330.0" y1="90.0" x2="330.0" y2="84.0" stroke="#7D6BB8" stroke-width="4"/><line x1="360.0" y1="98.0" x2="363.0" y2="92.8" stroke="#7D6BB8" stroke-width="4"/><line x1="382.0" y1="120.0" x2="387.2" y2="117.0" stroke="#7D6BB8" stroke-width="4"/><line class="spin" x1="330" y1="150" x2="330" y2="104" stroke="#7D6BB8" stroke-width="5" stroke-linecap="round"/><line class="spin fast" x1="330" y1="150" x2="370" y2="150" stroke="#7D6BB8" stroke-width="3" stroke-linecap="round"/><g fill="#7D6BB8"><circle class="twinkle" cx="60" cy="90" r="3"/><circle class="twinkle" cx="150" cy="200" r="2.5" style="animation-delay:1s"/><circle class="twinkle" cx="90" cy="320" r="2" style="animation-delay:2s"/><circle class="twinkle" cx="250" cy="60" r="2.5" style="animation-delay:.5s"/></g></svg></div><div class="scene" style="background:linear-gradient(180deg,#E3F1D2 0%,#EEF7E4 50%,#F7FBF1 100%)"><svg class="deco" viewBox="0 0 400 900" preserveAspectRatio="xMidYMid slice"><path d="M0 760 Q100 700 200 750 T400 730 V900 H0Z" fill="#A8C77A"/><path d="M0 820 Q120 770 240 820 T400 800 V900 H0Z" fill="#88AD57"/><g stroke="#88AD57" stroke-width="3" fill="none"><path d="M40 120 q10 -12 20 0 q10 -12 20 0"/><path d="M290 200 q8 -10 16 0 q8 -10 16 0"/></g></svg></div><div class="scene" style="background:linear-gradient(180deg,#D3ECEF 0%,#E4F3F4 50%,#F2F9F9 100%)"><svg class="deco" viewBox="0 0 400 900" preserveAspectRatio="xMidYMid slice"><g stroke="#6FB3BF" stroke-width="3" fill="none" stroke-linecap="round"><path class="ripple" d="M20 600 q20 -10 40 0 t40 0 t40 0"/><path class="ripple" style="animation-delay:1s" d="M230 680 q20 -10 40 0 t40 0 t40 0"/><path class="ripple" style="animation-delay:2s" d="M60 780 q20 -10 40 0 t40 0 t40 0"/><path class="ripple" style="animation-delay:.5s" d="M250 860 q20 -10 40 0 t40 0"/></g><path d="M0 520 H400" stroke="#9CCDD4" stroke-width="2" opacity=".6"/></svg><span class="cloud" style="--w:90px;--t:57s;top:17%;animation-delay:-46s"></span><span class="cloud" style="--w:110px;--t:68s;top:23%;animation-delay:-5s"></span><span class="cloud" style="--w:68px;--t:39s;top:55%;animation-delay:-35s"></span></div><div class="scene" style="background:linear-gradient(180deg,#DCE6F4 0%,#E9EFF8 50%,#F4F7FC 100%)"><svg class="deco" viewBox="0 0 400 900" preserveAspectRatio="xMidYMid slice"><g fill="#9DB4D6"><rect x="10" y="720" width="40" height="180"/><rect x="55" y="680" width="34" height="220"/><rect x="95" y="740" width="46" height="160"/><rect x="200" y="700" width="30" height="200"/><rect x="236" y="660" width="38" height="240"/><rect x="280" y="730" width="44" height="170"/><rect x="330" y="690" width="36" height="210"/><rect x="370" y="750" width="40" height="150"/></g><g fill="#7F9BC6"><rect x="166" y="560" width="10" height="340"/><ellipse cx="171" cy="610" rx="16" ry="9"/><rect x="169" y="460" width="4" height="100"/></g></svg></div><div class="scene" style="background:linear-gradient(180deg,#F3DDE6 0%,#F8EAF0 50%,#FBF5F8 100%)"><svg class="deco" viewBox="0 0 400 900" preserveAspectRatio="xMidYMid slice"><g fill="#C88AA3"><path d="M20 900 V760 l30 -40 l30 40 V900Z"/><rect x="90" y="740" width="120" height="160"/><path d="M90 740 l60 -50 l60 50Z"/><rect x="140" y="650" width="20" height="40"/><path d="M135 650 l15 -25 l15 25Z"/><rect x="230" y="770" width="150" height="130"/><path d="M230 770 l75 -45 l75 45Z"/></g><g fill="#F8EAF0"><rect x="110" y="780" width="12" height="22" rx="6"/><rect x="144" y="780" width="12" height="22" rx="6"/><rect x="178" y="780" width="12" height="22" rx="6"/><rect x="255" y="800" width="12" height="20" rx="6"/><rect x="300" y="800" width="12" height="20" rx="6"/><rect x="345" y="800" width="12" height="20" rx="6"/></g></svg></div><div class="scene" style="background:linear-gradient(180deg,#FBE0D0 0%,#FCEDE3 50%,#FDF6F1 100%)"><svg class="deco" viewBox="0 0 400 900" preserveAspectRatio="xMidYMid slice"><path d="M150 520 L250 520 L400 900 L0 900Z" fill="#E7B79B"/><g stroke="#FDF6F1" stroke-width="6" stroke-dasharray="26 22"><path d="M200 530 L200 900"/></g><circle cx="320" cy="140" r="40" fill="#F2A37A"/></svg></div><div class="scene" style="background:linear-gradient(180deg,#E2D8F0 0%,#EEE6F3 45%,#FBEFE3 100%)"><svg class="deco" viewBox="0 0 400 900" preserveAspectRatio="xMidYMid slice"><circle cx="320" cy="130" r="56" fill="#F6D58C"/><circle cx="342" cy="118" r="50" fill="#E2D8F0"/><g fill="#5D4A86" class="bat"><path d="M60 180 q12 -14 24 0 q6 -6 12 0 q6 -6 12 0 q12 -14 24 0 q-18 4 -36 14 q-18 -10 -36 -14z"/></g><g fill="#5D4A86" class="bat" style="animation-delay:2s"><path d="M200 90 q8 -10 16 0 q4 -4 8 0 q4 -4 8 0 q8 -10 16 0 q-12 3 -24 10 q-12 -7 -24 -10z"/></g><g fill="#E58A3A"><ellipse cx="70" cy="860" rx="38" ry="30"/><ellipse cx="330" cy="870" rx="30" ry="24"/></g><g fill="#7A8F3A"><rect x="66" y="822" width="8" height="12" rx="2"/><rect x="326" y="840" width="7" height="10" rx="2"/></g></svg></div><div class="scene" style="background:linear-gradient(180deg,#F9D3B9 0%,#FAE3D3 35%,#E6EEF8 100%)"><svg class="deco" viewBox="0 0 400 900" preserveAspectRatio="xMidYMid slice"><circle cx="300" cy="200" r="64" fill="#F6B07E"/></svg><span class="cloud" style="--w:119px;--t:61s;top:38%;animation-delay:-8s"></span><span class="cloud" style="--w:83px;--t:38s;top:47%;animation-delay:-32s"></span><span class="cloud" style="--w:119px;--t:43s;top:46%;animation-delay:-35s"></span><span class="cloud" style="--w:65px;--t:62s;top:25%;animation-delay:-45s"></span><span class="cloud" style="--w:117px;--t:65s;top:24%;animation-delay:-10s"></span><span class="cloud" style="--w:90px;--t:41s;top:18%;animation-delay:-8s"></span><span class="cloud" style="--w:124px;--t:42s;top:53%;animation-delay:-50s"></span></div><div class="scene-water" id="sceneWater"></div><div class="scene-dark" id="sceneDark"></div></div>
+    <div class="scenes" id="scenes" aria-hidden="true"><div class="scene" style="background:linear-gradient(180deg,#BFDDF7 0%,#DCEDFB 45%,#F1F7FC 100%)"><span class="cloud" style="--w:77px;--t:42s;top:36%;animation-delay:-7s"></span><span class="cloud" style="--w:123px;--t:66s;top:64%;animation-delay:-41s"></span><span class="cloud" style="--w:108px;--t:51s;top:16%;animation-delay:-31s"></span><span class="cloud" style="--w:63px;--t:62s;top:59%;animation-delay:-38s"></span><span class="cloud" style="--w:60px;--t:66s;top:38%;animation-delay:-46s"></span><span class="cloud" style="--w:89px;--t:44s;top:44%;animation-delay:-1s"></span><span class="cloud" style="--w:62px;--t:39s;top:87%;animation-delay:-34s"></span><span class="cloud" style="--w:61px;--t:62s;top:31%;animation-delay:-27s"></span><span class="cloud" style="--w:63px;--t:52s;top:60%;animation-delay:-60s"></span></div><div class="scene" style="background:linear-gradient(180deg,#FBE2C6 0%,#FCEEDD 50%,#FBF5EC 100%)"><svg class="deco" viewBox="0 0 400 900" preserveAspectRatio="xMidYMid slice"><g fill="#E39A4F"><circle cx="40" cy="840" r="70"/><circle cx="120" cy="870" r="60"/><circle cx="300" cy="850" r="80"/><circle cx="380" cy="880" r="60"/></g><g fill="#C9612F"><circle cx="80" cy="880" r="50"/><circle cx="230" cy="890" r="55"/></g></svg><span class="fleaf" style="left:7%;--c:#D9632B;--t:10s;--d:-11s;--x:46px"></span><span class="fleaf" style="left:21%;--c:#E8A23A;--t:13s;--d:-6s;--x:17px"></span><span class="fleaf" style="left:4%;--c:#B5532A;--t:11s;--d:-13s;--x:21px"></span><span class="fleaf" style="left:50%;--c:#B5532A;--t:14s;--d:-14s;--x:4px"></span><span class="fleaf" style="left:34%;--c:#D9632B;--t:9s;--d:-11s;--x:-1px"></span><span class="fleaf" style="left:40%;--c:#E3B341;--t:15s;--d:-5s;--x:11px"></span><span class="fleaf" style="left:22%;--c:#C2412D;--t:12s;--d:-0s;--x:-38px"></span><span class="fleaf" style="left:41%;--c:#C2412D;--t:11s;--d:-11s;--x:5px"></span><span class="fleaf" style="left:86%;--c:#B5532A;--t:11s;--d:-14s;--x:41px"></span><span class="fleaf" style="left:53%;--c:#B5532A;--t:14s;--d:-11s;--x:-14px"></span><span class="fleaf" style="left:57%;--c:#C2412D;--t:15s;--d:-14s;--x:23px"></span><span class="fleaf" style="left:67%;--c:#C2412D;--t:16s;--d:-8s;--x:58px"></span></div><div class="scene" style="background:linear-gradient(180deg,#DCD6F0 0%,#EAE6F6 50%,#F6F4FA 100%)"><svg class="deco" viewBox="0 0 400 900" preserveAspectRatio="xMidYMid slice"><circle cx="330" cy="150" r="70" fill="none" stroke="#7D6BB8" stroke-width="5"/><line x1="390.0" y1="150.0" x2="396.0" y2="150.0" stroke="#7D6BB8" stroke-width="4"/><line x1="382.0" y1="180.0" x2="387.2" y2="183.0" stroke="#7D6BB8" stroke-width="4"/><line x1="360.0" y1="202.0" x2="363.0" y2="207.2" stroke="#7D6BB8" stroke-width="4"/><line x1="330.0" y1="210.0" x2="330.0" y2="216.0" stroke="#7D6BB8" stroke-width="4"/><line x1="300.0" y1="202.0" x2="297.0" y2="207.2" stroke="#7D6BB8" stroke-width="4"/><line x1="278.0" y1="180.0" x2="272.8" y2="183.0" stroke="#7D6BB8" stroke-width="4"/><line x1="270.0" y1="150.0" x2="264.0" y2="150.0" stroke="#7D6BB8" stroke-width="4"/><line x1="278.0" y1="120.0" x2="272.8" y2="117.0" stroke="#7D6BB8" stroke-width="4"/><line x1="300.0" y1="98.0" x2="297.0" y2="92.8" stroke="#7D6BB8" stroke-width="4"/><line x1="330.0" y1="90.0" x2="330.0" y2="84.0" stroke="#7D6BB8" stroke-width="4"/><line x1="360.0" y1="98.0" x2="363.0" y2="92.8" stroke="#7D6BB8" stroke-width="4"/><line x1="382.0" y1="120.0" x2="387.2" y2="117.0" stroke="#7D6BB8" stroke-width="4"/><line class="spin" x1="330" y1="150" x2="330" y2="104" stroke="#7D6BB8" stroke-width="5" stroke-linecap="round"/><line class="spin fast" x1="330" y1="150" x2="370" y2="150" stroke="#7D6BB8" stroke-width="3" stroke-linecap="round"/><g fill="#7D6BB8"><circle class="twinkle" cx="60" cy="90" r="3"/><circle class="twinkle" cx="150" cy="200" r="2.5" style="animation-delay:1s"/><circle class="twinkle" cx="90" cy="320" r="2" style="animation-delay:2s"/><circle class="twinkle" cx="250" cy="60" r="2.5" style="animation-delay:.5s"/></g></svg></div><div class="scene" style="background:linear-gradient(180deg,#E3F1D2 0%,#EEF7E4 50%,#F7FBF1 100%)"><svg class="deco" viewBox="0 0 400 900" preserveAspectRatio="xMidYMid slice"><path d="M0 760 Q100 700 200 750 T400 730 V900 H0Z" fill="#A8C77A"/><path d="M0 820 Q120 770 240 820 T400 800 V900 H0Z" fill="#88AD57"/><g stroke="#88AD57" stroke-width="3" fill="none"><path d="M40 120 q10 -12 20 0 q10 -12 20 0"/><path d="M290 200 q8 -10 16 0 q8 -10 16 0"/></g></svg></div><div class="scene" style="background:linear-gradient(180deg,#D3ECEF 0%,#E4F3F4 50%,#F2F9F9 100%)"><svg class="deco" viewBox="0 0 400 900" preserveAspectRatio="xMidYMid slice"><g stroke="#6FB3BF" stroke-width="3" fill="none" stroke-linecap="round"><path class="ripple" d="M20 600 q20 -10 40 0 t40 0 t40 0"/><path class="ripple" style="animation-delay:1s" d="M230 680 q20 -10 40 0 t40 0 t40 0"/><path class="ripple" style="animation-delay:2s" d="M60 780 q20 -10 40 0 t40 0 t40 0"/><path class="ripple" style="animation-delay:.5s" d="M250 860 q20 -10 40 0 t40 0"/></g><path d="M0 520 H400" stroke="#9CCDD4" stroke-width="2" opacity=".6"/></svg><span class="cloud" style="--w:90px;--t:57s;top:17%;animation-delay:-46s"></span><span class="cloud" style="--w:110px;--t:68s;top:23%;animation-delay:-5s"></span><span class="cloud" style="--w:68px;--t:39s;top:55%;animation-delay:-35s"></span></div><div class="scene" style="background:linear-gradient(180deg,#DCE6F4 0%,#E9EFF8 50%,#F4F7FC 100%)"><svg class="deco" viewBox="0 0 400 900" preserveAspectRatio="xMidYMid slice"><g fill="#9DB4D6"><rect x="10" y="720" width="40" height="180"/><rect x="55" y="680" width="34" height="220"/><rect x="95" y="740" width="46" height="160"/><rect x="200" y="700" width="30" height="200"/><rect x="236" y="660" width="38" height="240"/><rect x="280" y="730" width="44" height="170"/><rect x="330" y="690" width="36" height="210"/><rect x="370" y="750" width="40" height="150"/></g><g fill="#7F9BC6"><rect x="166" y="560" width="10" height="340"/><ellipse cx="171" cy="610" rx="16" ry="9"/><rect x="169" y="460" width="4" height="100"/></g></svg></div><div class="scene" style="background:linear-gradient(180deg,#F3DDE6 0%,#F8EAF0 50%,#FBF5F8 100%)"><svg class="deco" viewBox="0 0 400 900" preserveAspectRatio="xMidYMid slice"><g fill="#C88AA3"><path d="M20 900 V760 l30 -40 l30 40 V900Z"/><rect x="90" y="740" width="120" height="160"/><path d="M90 740 l60 -50 l60 50Z"/><rect x="140" y="650" width="20" height="40"/><path d="M135 650 l15 -25 l15 25Z"/><rect x="230" y="770" width="150" height="130"/><path d="M230 770 l75 -45 l75 45Z"/></g><g fill="#F8EAF0"><rect x="110" y="780" width="12" height="22" rx="6"/><rect x="144" y="780" width="12" height="22" rx="6"/><rect x="178" y="780" width="12" height="22" rx="6"/><rect x="255" y="800" width="12" height="20" rx="6"/><rect x="300" y="800" width="12" height="20" rx="6"/><rect x="345" y="800" width="12" height="20" rx="6"/></g></svg></div><div class="scene" style="background:linear-gradient(180deg,#FBE0D0 0%,#FCEDE3 50%,#FDF6F1 100%)"><svg class="deco" viewBox="0 0 400 900" preserveAspectRatio="xMidYMid slice"><path d="M150 520 L250 520 L400 900 L0 900Z" fill="#E7B79B"/><g stroke="#FDF6F1" stroke-width="6" stroke-dasharray="26 22"><path d="M200 530 L200 900"/></g><circle cx="320" cy="140" r="40" fill="#F2A37A"/></svg></div><div class="scene" style="background:linear-gradient(180deg,#E2D8F0 0%,#EEE6F3 45%,#FBEFE3 100%)"><svg class="deco" viewBox="0 0 400 900" preserveAspectRatio="xMidYMid slice"><circle cx="320" cy="130" r="56" fill="#F6D58C"/><circle cx="342" cy="118" r="50" fill="#E2D8F0"/><g fill="#5D4A86" class="bat"><path d="M60 180 q12 -14 24 0 q6 -6 12 0 q6 -6 12 0 q12 -14 24 0 q-18 4 -36 14 q-18 -10 -36 -14z"/></g><g fill="#5D4A86" class="bat" style="animation-delay:2s"><path d="M200 90 q8 -10 16 0 q4 -4 8 0 q4 -4 8 0 q8 -10 16 0 q-12 3 -24 10 q-12 -7 -24 -10z"/></g><g fill="#E58A3A"><ellipse cx="70" cy="860" rx="38" ry="30"/><ellipse cx="330" cy="870" rx="30" ry="24"/></g><g fill="#7A8F3A"><rect x="66" y="822" width="8" height="12" rx="2"/><rect x="326" y="840" width="7" height="10" rx="2"/></g></svg></div><div class="scene" style="background:linear-gradient(180deg,#F9D3B9 0%,#FAE3D3 35%,#E6EEF8 100%)"><svg class="deco" viewBox="0 0 400 900" preserveAspectRatio="xMidYMid slice"><circle cx="300" cy="200" r="64" fill="#F6B07E"/></svg><span class="cloud" style="--w:119px;--t:61s;top:38%;animation-delay:-8s"></span><span class="cloud" style="--w:83px;--t:38s;top:47%;animation-delay:-32s"></span><span class="cloud" style="--w:119px;--t:43s;top:46%;animation-delay:-35s"></span><span class="cloud" style="--w:65px;--t:62s;top:25%;animation-delay:-45s"></span><span class="cloud" style="--w:117px;--t:65s;top:24%;animation-delay:-10s"></span><span class="cloud" style="--w:90px;--t:41s;top:18%;animation-delay:-8s"></span><span class="cloud" style="--w:124px;--t:42s;top:53%;animation-delay:-50s"></span></div><div class="scene-tarmac" id="sceneTarmac"></div><div class="scene-water" id="sceneWater"></div><div class="scene-dark" id="sceneDark"></div></div>
     <div class="scroll" id="tripScroll">
       <div class="top"><span class="brand"><span class="bullet sm" aria-hidden="true">W</span>Waypoint</span><span class="pill" id="sceneName">Oct 23 – Nov 1</span></div>
       <div class="hero">
@@ -409,7 +427,7 @@ button{cursor:pointer}
       </div>
       <section class="live" id="live" aria-live="polite"></section>
       <nav class="lines" aria-label="Jump to a school" id="lines"></nav>
-      <ol class="route" id="route"><div class="features" id="features" aria-hidden="true"></div><svg class="tracksvg" id="trackSvg" aria-hidden="true"></svg><div class="features over" id="featuresTop" aria-hidden="true"></div><div class="train" id="train" aria-hidden="true"><div class="body"><svg width="28" height="82" viewBox="0 0 28 82"><g fill="#2B343C"><rect x="1" y="5" width="3" height="6" rx="1"/><rect x="24" y="5" width="3" height="6" rx="1"/><rect x="1" y="21" width="3" height="6" rx="1"/><rect x="24" y="21" width="3" height="6" rx="1"/><rect x="0" y="42" width="3" height="7" rx="1"/><rect x="25" y="42" width="3" height="7" rx="1"/><rect x="0" y="64" width="3" height="7" rx="1"/><rect x="25" y="64" width="3" height="7" rx="1"/></g><rect x="4" y="1" width="20" height="31" rx="6" fill="#12171C"/><rect x="11.5" y="5" width="5" height="23" rx="2.5" fill="#34404A"/><g fill="#8FC7F0"><rect x="5.5" y="6" width="2" height="4" rx="1"/><rect x="5.5" y="13" width="2" height="4" rx="1"/><rect x="5.5" y="20" width="2" height="4" rx="1"/><rect x="20.5" y="6" width="2" height="4" rx="1"/><rect x="20.5" y="13" width="2" height="4" rx="1"/><rect x="20.5" y="20" width="2" height="4" rx="1"/></g><rect x="4" y="26" width="20" height="2.5" fill="#F2B233"/><rect x="12" y="32" width="4" height="6" fill="#5B6772"/><rect x="3" y="38" width="22" height="41" rx="8" fill="#12171C"/><rect x="3" y="51" width="22" height="3" fill="#F2B233"/><circle cx="14" cy="45" r="3.8" fill="#34404A"/><circle cx="14" cy="45" r="1.8" fill="#0A0D10"/><rect x="9" y="56" width="10" height="3" rx="1.5" fill="#34404A"/><rect x="6" y="61" width="16" height="9" rx="3" fill="#8FC7F0"/><rect x="6" y="61" width="16" height="3" rx="1.5" fill="#CDE8FA"/><circle class="hl" cx="9.5" cy="75" r="2" fill="#FFD36B"/><circle class="hl" cx="18.5" cy="75" r="2" fill="#FFD36B"/></svg></div><span class="jet"><svg class="shadow" width="52" height="54" viewBox="0 0 52 54"><path d="M26 2c2 0 3 3 3 7v12l20 9v5l-20-5v13l6 5v4l-9-3-9 3v-4l6-5V35L3 40v-5l20-9V9c0-4 1-7 3-7z" fill="#12171C"/></svg><svg width="52" height="54" viewBox="0 0 52 54" style="position:absolute;left:0;top:0"><g transform="rotate(180 26 27)"><path d="M26 2c2 0 3 3 3 7v12l20 9v5l-20-5v13l6 5v4l-9-3-9 3v-4l6-5V35L3 40v-5l20-9V9c0-4 1-7 3-7z" fill="#fff" stroke="#12171C" stroke-width="1.6" stroke-linejoin="round"/><path d="M23 26l-19 9M29 26l19 9" stroke="#2563C9" stroke-width="2.4" stroke-linecap="round"/><rect x="24.5" y="5" width="3" height="5" rx="1.5" fill="#8FC7F0"/><path d="M22 47l4-1.5 4 1.5" stroke="#2563C9" stroke-width="2" fill="none" stroke-linecap="round"/></g></svg></span><span class="beam"></span></div><div class="scenery" id="scenery" aria-hidden="true"></div><div class="puffs" id="puffs"></div></ol>
+      <ol class="route" id="route"><div class="features" id="features" aria-hidden="true"></div><svg class="tracksvg" id="trackSvg" aria-hidden="true"></svg><div class="features over" id="featuresTop" aria-hidden="true"></div><div class="train" id="train" aria-hidden="true"><div class="body"><svg width="28" height="82" viewBox="0 0 28 82"><g fill="#2B343C"><rect x="1" y="5" width="3" height="6" rx="1"/><rect x="24" y="5" width="3" height="6" rx="1"/><rect x="1" y="21" width="3" height="6" rx="1"/><rect x="24" y="21" width="3" height="6" rx="1"/><rect x="0" y="42" width="3" height="7" rx="1"/><rect x="25" y="42" width="3" height="7" rx="1"/><rect x="0" y="64" width="3" height="7" rx="1"/><rect x="25" y="64" width="3" height="7" rx="1"/></g><rect x="4" y="1" width="20" height="31" rx="6" fill="#12171C"/><rect x="11.5" y="5" width="5" height="23" rx="2.5" fill="#34404A"/><g fill="#8FC7F0"><rect x="5.5" y="6" width="2" height="4" rx="1"/><rect x="5.5" y="13" width="2" height="4" rx="1"/><rect x="5.5" y="20" width="2" height="4" rx="1"/><rect x="20.5" y="6" width="2" height="4" rx="1"/><rect x="20.5" y="13" width="2" height="4" rx="1"/><rect x="20.5" y="20" width="2" height="4" rx="1"/></g><rect x="4" y="26" width="20" height="2.5" fill="#F2B233"/><rect x="12" y="32" width="4" height="6" fill="#5B6772"/><rect x="3" y="38" width="22" height="41" rx="8" fill="#12171C"/><rect x="3" y="51" width="22" height="3" fill="#F2B233"/><circle cx="14" cy="45" r="3.8" fill="#34404A"/><circle cx="14" cy="45" r="1.8" fill="#0A0D10"/><rect x="9" y="56" width="10" height="3" rx="1.5" fill="#34404A"/><rect x="6" y="61" width="16" height="9" rx="3" fill="#8FC7F0"/><rect x="6" y="61" width="16" height="3" rx="1.5" fill="#CDE8FA"/><circle class="hl" cx="9.5" cy="75" r="2" fill="#FFD36B"/><circle class="hl" cx="18.5" cy="75" r="2" fill="#FFD36B"/></svg></div><span class="jet"><svg class="shadow" width="52" height="54" viewBox="0 0 52 54"><path d="M26 2c2 0 3 3 3 7v12l20 9v5l-20-5v13l6 5v4l-9-3-9 3v-4l6-5V35L3 40v-5l20-9V9c0-4 1-7 3-7z" fill="#12171C"/></svg><svg width="52" height="54" viewBox="0 0 52 54" style="position:absolute;left:0;top:0"><g transform="rotate(180 26 27)"><path d="M26 2c2 0 3 3 3 7v12l20 9v5l-20-5v13l6 5v4l-9-3-9 3v-4l6-5V35L3 40v-5l20-9V9c0-4 1-7 3-7z" fill="#fff" stroke="#12171C" stroke-width="1.6" stroke-linejoin="round"/><path d="M23 26l-19 9M29 26l19 9" stroke="#2563C9" stroke-width="2.4" stroke-linecap="round"/><rect x="24.5" y="5" width="3" height="5" rx="1.5" fill="#8FC7F0"/><path d="M22 47l4-1.5 4 1.5" stroke="#2563C9" stroke-width="2" fill="none" stroke-linecap="round"/></g></svg></span><span class="beam"></span></div><div class="scenery" id="scenery" aria-hidden="true"></div><div class="puffs" id="puffs"></div><div class="vcap" id="vcap" aria-hidden="true"></div></ol>
       <div class="end"><span></span><i aria-hidden="true"></i><span>End of the line · back in Barcelona Mon Nov 2</span></div>
     </div>
   </section>
@@ -794,6 +812,7 @@ const trackSvg = $('trackSvg'), features = $('features'), featuresTop = $('featu
 const train = $('train'), puffs = $('puffs'), tripScroll = $('tripScroll');
 const OFF = 56;                       // the train pulls up just below each station so the roundel stays visible
 const FEAT = { 0:'siding', 2:'bridge', 4:'tunnel', 6:'crossing' };   // segment i -> i+1
+let subDocks = [];
 let stY = [], cx = 0, railTop = 0, railEnd = 0, samples = [], total = 1, litPath = null, crossings = [];
 function seg(i){ const a = stY[i] + 34, b = stY[i + 1] - 22; return { a, b, m:(a + b) / 2 }; }
 function buildTrack(){
@@ -801,7 +820,25 @@ function buildTrack(){
   const r0 = route.getBoundingClientRect().top;
   stY = stations.map(st => st.querySelector('.mark').getBoundingClientRect().top - r0 + 22);
   cx = stations[0].querySelector('.mark').getBoundingClientRect().left - route.getBoundingClientRect().left + 14;
-  railTop = stY[0] - 30; railEnd = stY[N - 1] + OFF + 60;
+  // flight days: each step in an open day becomes a stop for the plane
+  subDocks = [];
+  [0, N - 1].forEach(k => {
+    if (!stations[k].classList.contains('open')) return;
+    const items = DAYS[k].items;
+    stations[k].querySelectorAll('.stops li').forEach((li, j) => {
+      const r = li.getBoundingClientRect();
+      if (r.height < 4) return;
+      const y = r.top - r0 + Math.min(40, r.height / 2);
+      if (y < stY[k] + OFF + 20) return;
+      const it = items[j], t = it.title;
+      const m = /Flight \d\s*·\s*(.+)/.exec(t);
+      const mode = m ? 'air' : /Check in|Connect|Land at|Online check-in|Leave for Pearson/.test(t) ? 'ground' : 'rail';
+      const cap = m ? [m[1], 'In the air'] : /Check in/.test(t) ? ['BCN', 'At the gate'] : /Connect/.test(t) ? ['Dulles', 'Connecting'] : /Land at/.test(t) ? ['YYZ', 'Landed'] : /→ Dundas/.test(t) ? ['Dundas', 'Driving there'] : /Billy Bishop/.test(t) ? ['YTZ', 'Heading over'] : [t.split(' ')[0], it.t];
+      subDocks.push({ y, k, li, mode, cap });
+    });
+  });
+  railTop = stY[0] - 30;
+  railEnd = Math.max(stY[N - 1] + OFF + 60, ...subDocks.filter(d => d.k === N - 1).map(d => d.y + 70));
   let d = `M ${cx} ${railTop} L ${cx} ${stY[0]}`;
   for (let i = 0; i < N - 1; i++){
     const { a, b, m } = seg(i);
@@ -820,7 +857,7 @@ function buildTrack(){
   trackSvg.setAttribute('viewBox', `0 0 ${route.clientWidth} ${H}`);
   // siding: peels off left below the first station and rejoins
   let sidingD = '';
-  if (N > 1){
+  if (N > 1 && !stations[0].classList.contains('open')){
     const { a, b } = seg(0);
     if (b - a > 70){
       const s0 = a + 6, s1 = b - 6, sx = cx - 22;
@@ -947,11 +984,13 @@ function targetY(){
   let t = tripScroll.scrollTop + tripScroll.clientHeight * 0.42 - routeTop;
   const maxScroll = tripScroll.scrollHeight - tripScroll.clientHeight;
   const remaining = maxScroll - tripScroll.scrollTop, blend = tripScroll.clientHeight * 0.35;
-  if (remaining < blend) t += (stY[N - 1] + OFF - t) * (1 - Math.max(0, remaining) / blend);
-  t = Math.max(stY[0] + OFF, Math.min(stY[N - 1] + OFF, t));
-  let best = 0; for (let i = 1; i < N; i++) if (Math.abs(stY[i] + OFF - t) < Math.abs(stY[best] + OFF - t)) best = i;
-  const d = t - (stY[best] + OFF), zone = 70;
-  if (Math.abs(d) < zone) t = stY[best] + OFF + d * Math.pow(Math.abs(d) / zone, 2);
+  const docks = stY.map(y => y + OFF).concat(subDocks.map(d => d.y)).sort((a, b) => a - b);
+  const lastDock = docks[docks.length - 1];
+  if (remaining < blend) t += (lastDock - t) * (1 - Math.max(0, remaining) / blend);
+  t = Math.max(docks[0], Math.min(lastDock, t));
+  let best = docks[0]; for (const dk of docks) if (Math.abs(dk - t) < Math.abs(best - t)) best = dk;
+  const d = t - best, zone = 60;
+  if (Math.abs(d) < zone) t = best + d * Math.pow(Math.abs(d) / zone, 2);
   return t;
 }
 let ty = null, tv = 0, tLast = 0, running = false, lastPuff = 0, arrivedAt = -1, pos = { x:0, y:0, L:0, ang:0 };
@@ -963,7 +1002,8 @@ function paintScene(){
   if (!stY.length || ty === null) return;
   const dock = stY.map(y => y + OFF);
   let i = 0; while (i < N - 1 && ty >= dock[i + 1]) i++;
-  const f = i >= N - 1 ? 0 : (ty - dock[i]) / (dock[i + 1] - dock[i]);
+  const start = Math.max(dock[i], ...subDocks.filter(d => d.k === i).map(d => d.y));
+  const f = i >= N - 1 ? 0 : Math.max(0, (ty - start) / Math.max(1, dock[i + 1] - start));
   const wNext = smooth(0.3, 0.75, f);                       // the next scene fades in over the back half of the run
   for (let k = 0; k < sceneEls.length; k++){
     const w = k === i ? 1 - wNext : k === i + 1 ? wNext : 0;
@@ -976,6 +1016,36 @@ function paintScene(){
   sceneDark.style.opacity = (inRange(4, 40) * 0.9).toFixed(3);
   sceneWater.style.opacity = (inRange(2, 40) * 0.9).toFixed(3);
 }
+let curSub = null;
+function updateMode(){
+  let mode = 'rail', sub = null;
+  const day0 = ty < stY[1] + OFF - 45, dayN = ty > stY[N - 1] + OFF - 45;
+  if (ty < stY[0] + OFF - 30) mode = 'air';                        // flying in at the very top
+  else if (day0 || dayN){
+    const k = day0 ? 0 : N - 1;
+    const subs = subDocks.filter(d => d.k === k);
+    if (subs.length){
+      // the step the vehicle is at or has most recently passed
+      for (const d of subs) if (ty >= d.y - 30) sub = d;
+      mode = sub ? sub.mode : 'ground';
+      if (k === 0 && sub && sub.mode === 'rail' && ty > sub.y + 40) mode = 'rail';
+    } else mode = 'ground';
+  }
+  const plane = mode !== 'rail';
+  if (plane !== train.classList.contains('plane')) train.classList.toggle('plane', plane);
+  if ((mode === 'air') !== train.classList.contains('air')) train.classList.toggle('air', mode === 'air');
+  // caption beside the vehicle + highlight the step row
+  const cap = $('vcap');
+  if (sub !== curSub){
+    if (curSub) curSub.li.classList.remove('cur');
+    if (sub) sub.li.classList.add('cur');
+    curSub = sub;
+    if (sub){ cap.innerHTML = `${esc(sub.cap[0])}<small>${esc(sub.cap[1])}</small>`; cap.classList.toggle('air', sub.mode === 'air'); }
+  }
+  cap.classList.toggle('on', !!sub);
+  if (sub){ cap.style.transform = `translate(${(pos.x - 104).toFixed(1)}px,${(pos.y - 16).toFixed(1)}px)`; }
+  $('sceneTarmac').style.opacity = (sub && sub.mode === 'ground' ? 0.9 : 0).toString();
+}
 function render(){
   pos = atY(ty);
   paintScene();
@@ -985,8 +1055,7 @@ function render(){
   train.classList.toggle('moving', moving);
   if (Math.abs(tv) > 60) train.classList.toggle('up', tv < 0);
   // flight days (the first and last stations) fly; everything in between rides the rails
-  const flying = ty < stY[0] + OFF + 45 || ty > stY[N - 1] + OFF - 45;
-  if (flying !== train.classList.contains('plane')) train.classList.toggle('plane', flying);
+  updateMode();
   for (let i = 0; i < signalEls.length; i++){
     const passed = ty - 40 > signals[i];
     signalEls[i].classList.toggle('green', passed);
@@ -1004,12 +1073,12 @@ let lastIdle = 0, lastLeaf = 0;
 function puff(now){
   if (reduce || puffs.childElementCount > 34) return;
   const speed = Math.abs(tv), moving = speed > 30;
-  if (moving ? now - lastPuff < Math.max(45, 110 - speed * 0.08) : now - lastIdle < 650) return;
+  if (moving ? now - lastPuff < Math.max(45, 110 - speed * 0.08) : now - lastIdle < (train.classList.contains('air') ? 260 : 650)) return;
   if (moving) lastPuff = now; else lastIdle = now;
   const up = train.classList.contains('up');
   const rad = -pos.ang * Math.PI / 180, ux = Math.sin(rad), uy = Math.cos(rad);   // unit vector down the line
   if (train.classList.contains('plane')){
-    if (!moving) return;                         // a parked plane doesn't smoke
+    if (!train.classList.contains('air')) return;  // a plane on the ground doesn't leave trails
     const back0 = up ? 1 : -1;
     for (const wx of [-15, 15]){
       const t = document.createElement('span');
@@ -1017,7 +1086,7 @@ function puff(now){
       t.style.left = (pos.x + wx * uy).toFixed(1) + 'px';
       t.style.top = (pos.y + back0 * 14).toFixed(1) + 'px';
       t.style.setProperty('--a', (pos.ang).toFixed(1) + 'deg');
-      t.style.setProperty('--dy', (back0 * 26) + 'px');
+      t.style.setProperty('--dy', (back0 * (moving ? 26 : 34)) + 'px');
       puffs.appendChild(t);
       t.addEventListener('animationend', () => t.remove());
     }
@@ -1051,7 +1120,7 @@ function puff(now){
     lf.addEventListener('animationend', () => lf.remove());
   }
 }
-setInterval(() => { if (!running && !reduce && $('v-trip').classList.contains('on') && ty !== null) puff(performance.now()); }, 700);
+setInterval(() => { if (!running && !reduce && $('v-trip').classList.contains('on') && ty !== null) puff(performance.now()); }, 260);
 function step(now){
   const dt = Math.min(0.034, (now - (tLast || now)) / 1000 || 0.016); tLast = now;
   const target = targetY();
