@@ -594,13 +594,13 @@ const DAYS = [
       { t:'Afternoon', title:'Scout McMaster', body:'Find Lot I and the John Hodgins Engineering building now, so Thursday is easy.', kind:'school-mac' }
     ] },
   { dow:'Wed', d:28, mon:'Oct', stop:3, name:'TMU', sub:'Campus tour', where:'350 Victoria St, Toronto',
-    note:['warn','Clash: “George for Evan” is also at 2:00 PM ET today. Take the 10:00 AM tour or move George.'],
+    note:['info','Booked: campus tour 10:00–11:30 AM. Check in at the Sheldon & Tracy Student Learning Centre lobby, 341 Yonge St, from 9:30.'],
     items:[
-      { t:'11:30 AM', title:'Leave Dundas', body:'Drive, or take a GO train from Aldershot. Parking downtown is expensive, so the train is easier.', kind:'travel' },
-      { t:'12:45 PM', title:'Lunch near Yonge–Dundas', body:'TMU is right off Yonge and Gould.', kind:'free' },
-      { t:'2:00 PM', title:'TMU campus tour', body:'Slots on the 28th: 10:00 AM or 2:00 PM, and you haven’t booked yet. The meeting point will be in the confirmation email.', kind:'school-tmu', tag:'To book' },
-      { t:'2:00 PM', title:'George for Evan', body:'From your calendar · clashes with the tour.', kind:'cal', tag:'Clash' },
-      { t:'Late PM', title:'Back to Dundas', body:'Leave before 4 PM or after 7 PM to dodge rush hour.', kind:'travel' }
+      { t:'7:15 AM', title:'Leave Dundas', body:'Aim to be downtown by 9:15. The GO train from Aldershot to Union is about 1 h, then a 20-min walk or TTC Line 1. Parking downtown is expensive, so the train is easier.', kind:'travel' },
+      { t:'9:30 AM', title:'Check in at the SLC lobby', body:'Sheldon & Tracy Student Learning Centre, 341 Yonge St. Check-in is open the half hour before the tour starts.', kind:'school-tmu', tag:'Check-in' },
+      { t:'10:00 AM', title:'TMU campus tour', body:'10:00–11:30 AM ET, booked. Tours run 1.5–2 h in any weather, led by current undergrads. Admissions questions go to the ServiceHub.', kind:'school-tmu', tag:'Booked' },
+      { t:'12:00 PM', title:'Lunch near Yonge–Dundas', body:'The tour ends around 11:30–12:00, right off Yonge. Plenty of food nearby.', kind:'free' },
+      { t:'Afternoon', title:'Back to Dundas', body:'Leave before 4 PM or after 7 PM to dodge rush hour.', kind:'travel' }
     ] },
   { dow:'Thu', d:29, mon:'Oct', stop:1, name:'McMaster', sub:'Mac Eng tour · you + 1 guest', where:'JHE A214 · 1280 Main St W, Hamilton',
     items:[
@@ -659,15 +659,15 @@ const SCHOOLS = [
       ['Heads up','It’s the day after you land, so plan for jet lag.']
     ],
     warn:'Registration is required. Sign up on the Ontario Tech Open House page before you go.' },
-  { key:'tmu', name:'Toronto Metropolitan University', short:'TMU', when:'Wed Oct 28 · 2:00 PM ET', city:'Toronto', drive:'1–1.5 h',
-    status:'Not booked', chipBg:'#FFDC00', chipFg:'#1F1A00', color:'#004C9B', soft:'#D6E4F5',
+  { key:'tmu', name:'Toronto Metropolitan University', short:'TMU', when:'Wed Oct 28 · 10:00–11:30 AM ET', city:'Toronto', drive:'1–1.5 h',
+    status:'Booked', chipBg:'#FFDC00', chipFg:'#1F1A00', color:'#004C9B', soft:'#D6E4F5',
     rows:[
-      ['Where','350 Victoria St, Toronto · off Yonge and Gould'],
-      ['Tour slots on the 28th','10:00 AM or 2:00 PM. You picked 2:00 PM, but the booking form isn’t submitted yet.'],
-      ['Getting there','GO train from Aldershot to Union (about 1 h), then a 20-min walk or TTC Line 1 to Dundas station. Or drive, though downtown parking is expensive.'],
-      ['Meeting point','It’ll be in your confirmation email.']
-    ],
-    warn:'You also have “George for Evan” at 2:00 PM ET that day. Book the 10:00 AM slot or move George.' },
+      ['Check in','Lobby of the Sheldon & Tracy Student Learning Centre, 341 Yonge St. Arrive during the half hour before the tour starts (9:30–10:00 AM).'],
+      ['Your booking','General campus tour, Wed Oct 28, 10:00–11:30 AM ET. Tours run 1.5–2 h and go ahead in rain or snow. Max 30 guests, and everyone in your party must be registered.'],
+      ['Getting there','GO train from Aldershot to Union (about 1 h), then a 20-min walk or TTC Line 1. Or drive, though downtown parking is expensive.'],
+      ['Changes','Use the Edit Submission link in the confirmation email, or reply to it if you can’t make it so they can free the spot.'],
+      ['Good to know','Guides are current undergrads and only cover student life. For admissions questions, use the ServiceHub. Accessibility requests: VisitUs@torontomu.ca, 2–3 weeks ahead.']
+    ] },
   { key:'mac', name:'McMaster University', short:'McMaster', when:'Thu Oct 29 · 1:30–2:45 PM ET', city:'Hamilton', drive:'10–15 min',
     status:'Booked', chipBg:'#FFFFFF', chipFg:'#7A003C', color:'#7A003C', soft:'#F1D6E2',
     rows:[
@@ -681,12 +681,11 @@ const SCHOOLS = [
 
 const GROUPS = [
   { title:'Book and confirm', items:[
-    ['tmu','Book the TMU tour','The 10:00 AM slot avoids your 2:00 PM clash with George.'],
+    ['tmu','TMU tour, Wed Oct 28, 10:00 AM','Booked. Check in at 341 Yonge St from 9:30.', true],
     ['otu','Register for the Ontario Tech Open House','Sat Oct 24, 10 AM – 3 PM. Registration is required.'],
     ['mac','McMaster tour, Thu 1:30 PM','Booked for you + 1 guest.', true],
     ['fl','Add flight numbers and booking refs','Four flights: BCN–IAD–YYZ out, YTZ–IAD–BCN home.'],
-    ['ride','Sort out a ride from Pearson on Oct 23',''],
-    ['geo','Move George on Oct 28','Only if you keep the 2:00 PM TMU slot.']
+    ['ride','Sort out a ride from Pearson on Oct 23','']
   ] },
   { title:'Documents', items:[
     ['pp','Canadian passport, valid through the trip','Fly on it both ways. No ESTA needed for the Dulles connections.'],
@@ -1609,7 +1608,6 @@ Oct 23–24: Barcelona +6 h. Oct 25–31: +5 h. Nov 1: +6 h.
 # Calendar items (from Evan's Google Calendar, likely online sessions)
 - Sun Oct 25 9:00 AM ET: George for Evan
 - Tue Oct 27 7:00 AM ET: Lisa for Evan
-- Wed Oct 28 2:00 PM ET: George for Evan (clashes with the 2:00 PM TMU tour)
 - Sun Nov 1 8:00 AM EST: George for Evan`;
 }
 
@@ -1640,7 +1638,7 @@ function bubble(role, content, isHtml){
   if (isHtml) d.innerHTML = content; else d.textContent = content;
   msgs.appendChild(d); return d;
 }
-const SUGS = ['What time should I leave for McMaster?', 'Which TMU slot should I book?', 'Walk me through the Dulles connection', 'What’s still left to sort out?'];
+const SUGS = ['What time should I leave for McMaster?', 'How do I get to the TMU tour by 9:30?', 'Walk me through the Dulles connection', 'What’s still left to sort out?'];
 function renderChat(){
   msgs.innerHTML = '';
   if (!history.length){
